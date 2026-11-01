@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OPEN LATE · Colorway board</title>
+<link rel="stylesheet" href="/static/tokens.css">
+<style>
+:root{--ground:var(--bg);--paper:var(--panel);--ink:var(--t1);--mute:var(--t2);--faint:var(--t3);
+  --good:var(--ok);--goodb:rgba(26,127,55,.12);--mid:var(--warn);--midb:rgba(154,103,0,.13);--badb:rgba(207,34,46,.11)}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:.86em}
+.wrap{max-width:1240px;margin:0 auto;padding:30px 16px 70px}
+.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:6px}
+.top h1{margin:0;font-size:20px;letter-spacing:.16em;font-weight:800}
+.top .sub{color:var(--mute)}
+.note{color:var(--mute);font-size:13.5px;margin:0 0 24px;max-width:80ch}
+.board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media(max-width:900px){.board{grid-template-columns:1fr}}
+.cw{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.cw header{display:flex;gap:14px;align-items:center}
+.pair{display:flex}
+.sw{display:inline-block;width:34px;height:34px;border-radius:50%;border:2px solid var(--paper);box-shadow:0 0 0 1px var(--line)}
+.pair .sw+.sw{margin-left:-10px}
+.sw.sm{width:16px;height:16px;border-width:1px}
+.cw h2{margin:0;font-size:17px}.cw h2 span{color:var(--faint);font-weight:400}
+.hex{margin:0;color:var(--mute)}
+.shots{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+figure{margin:0}
+figure img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;display:block;background:#ddd}
+figcaption{font-size:12px;color:var(--mute);margin-top:5px}
+.color{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;border-top:1px solid var(--line);padding-top:10px;font-size:13px}
+.cmp{display:flex;align-items:center;gap:6px;color:var(--mute)}
+.de{margin-left:auto;border-radius:99px;padding:2px 10px;font-size:12.5px}
+.de.good{background:var(--goodb);color:var(--good)}.de.mid{background:var(--midb);color:var(--mid)}.de.bad{background:var(--badb);color:var(--bad)}
+.obs{margin:30px 0 4px;font-size:15px}
+.foot{margin-top:8px;color:var(--mute);font-size:13.5px;max-width:80ch}
+.foot li{margin:4px 0}
+</style>
+</head>
+<body>
+<header id="ol-shell" data-page="colorways"></header>
+<script src="/static/shell.js"></script>
+<div class="wrap">
+  <div class="top"><h1>OPEN LATE</h1><span class="sub">Colorway board · FLUX.2 klein 4B renders</span></div>
+  <p class="note">{{NOTE}} Product shots were rendered with the same seed, changing only the colour, and on-model shots put those product shots on a synthetic person. The people in the on-model shots are not real (label them "Virtual model" when posting externally).</p>
+  <div class="board">{{CARDS}}</div>
+  <h3 class="obs">Observations</h3>
+  <ul class="foot">
+    <li><b>The product shots are usable.</b> With the same seed the composition stays consistent, and the lining colour and the flower bartack at the pocket corners show in all four. However, the flowers are drawn large, like embroidery, rather than as a thread bartack (1–1.5cm).</li>
+    <li><b>Only Ink navy gained a drawstring.</b> Even with the same seed, details change when the colour changes. A comparison board has to state details explicitly, for example "no drawstring".</li>
+    <li><b>Apricot came out orange.</b> It skews towards higher saturation.</li>
+    <li><b>The on-model shots ignore some instructions.</b> They ignored "hood down" and all four show the hood up, added a drawstring that was not in the product shots, and lost most of the flower bartacks. Small signature details drop out in the on-model composite.</li>
+    <li><b>Colours generally come out lighter.</b> Only Ink navy is close to the target (ΔE 3.6). Chestnut, Deep olive and Charcoal are noticeably off at 8.5–10.9.</li>
+  </ul>
+  <h3 class="obs">How to read this</h3>
+  <ul class="foot">
+    <li><b>ΔE00</b> is the difference between the target outer fabric colour and the colour at the centre of the rendered body panel. 1–2 is hard to tell apart by eye, 5 or more is immediately visible, and 10 or more reads as a different colour.</li>
+    <li>Renders are for checking direction only. Final colours are confirmed with swatches and a spectrophotometer.</li>
+    <li>The measurement is the median of a fixed patch at the centre of the body panel, so it is a rough value that mixes in lighting and shadow.</li>
+  </ul>
+</div></body></html>

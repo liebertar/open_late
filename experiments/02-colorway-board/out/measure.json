@@ -1,0 +1,18 @@
+{
+  "chestnut-sky": {
+    "rendered_hex": "#825445",
+    "delta_e00": 10.9
+  },
+  "olive-pink": {
+    "rendered_hex": "#585544",
+    "delta_e00": 8.5
+  },
+  "inknavy-apricot": {
+    "rendered_hex": "#292E41",
+    "delta_e00": 3.6
+  },
+  "ink-lemon": {
+    "rendered_hex": "#47454A",
+    "delta_e00": 9.3
+  }
+}

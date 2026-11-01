@@ -1,0 +1,9 @@
+{
+  "note": "The brief defines colour names only. Hex values are a provisional interpretation and will be confirmed with swatches.",
+  "colorways": [
+    {"id": "chestnut-sky",   "outer": "Chestnut",   "lining": "Sky",        "outer_en": "chestnut brown", "lining_en": "pale sky blue",  "outer_hex": "#5B3A29", "lining_hex": "#A9CBE8"},
+    {"id": "olive-pink",     "outer": "Deep olive", "lining": "Light pink", "outer_en": "deep olive",     "lining_en": "light pink",     "outer_hex": "#4A4E2A", "lining_hex": "#F2C6CF"},
+    {"id": "inknavy-apricot","outer": "Ink navy",   "lining": "Apricot",    "outer_en": "ink navy",       "lining_en": "apricot",        "outer_hex": "#1E2A44", "lining_hex": "#F4B488"},
+    {"id": "ink-lemon",      "outer": "Charcoal",   "lining": "Lemon",      "outer_en": "ink charcoal",   "lining_en": "lemon yellow",   "outer_hex": "#2A2A2C", "lining_hex": "#F1E05A"}
+  ]
+}
