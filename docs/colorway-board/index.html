@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OPEN LATE · Colorway board</title>
+<link rel="stylesheet" href="/static/tokens.css">
+<style>
+:root{--ground:var(--bg);--paper:var(--panel);--ink:var(--t1);--mute:var(--t2);--faint:var(--t3);
+  --good:var(--ok);--goodb:rgba(26,127,55,.12);--mid:var(--warn);--midb:rgba(154,103,0,.13);--badb:rgba(207,34,46,.11)}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:.86em}
+.wrap{max-width:1240px;margin:0 auto;padding:30px 16px 70px}
+.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:6px}
+.top h1{margin:0;font-size:20px;letter-spacing:.16em;font-weight:800}
+.top .sub{color:var(--mute)}
+.note{color:var(--mute);font-size:13.5px;margin:0 0 24px;max-width:80ch}
+.board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media(max-width:900px){.board{grid-template-columns:1fr}}
+.cw{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.cw header{display:flex;gap:14px;align-items:center}
+.pair{display:flex}
+.sw{display:inline-block;width:34px;height:34px;border-radius:50%;border:2px solid var(--paper);box-shadow:0 0 0 1px var(--line)}
+.pair .sw+.sw{margin-left:-10px}
+.sw.sm{width:16px;height:16px;border-width:1px}
+.cw h2{margin:0;font-size:17px}.cw h2 span{color:var(--faint);font-weight:400}
+.hex{margin:0;color:var(--mute)}
+.shots{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+figure{margin:0}
+figure img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;display:block;background:#ddd}
+figcaption{font-size:12px;color:var(--mute);margin-top:5px}
+.color{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;border-top:1px solid var(--line);padding-top:10px;font-size:13px}
+.cmp{display:flex;align-items:center;gap:6px;color:var(--mute)}
+.de{margin-left:auto;border-radius:99px;padding:2px 10px;font-size:12.5px}
+.de.good{background:var(--goodb);color:var(--good)}.de.mid{background:var(--midb);color:var(--mid)}.de.bad{background:var(--badb);color:var(--bad)}
+.obs{margin:30px 0 4px;font-size:15px}
+.foot{margin-top:8px;color:var(--mute);font-size:13.5px;max-width:80ch}
+.foot li{margin:4px 0}
+</style>
+</head>
+<body>
+<header id="ol-shell" data-page="colorways"></header>
+<script src="/static/shell.js"></script>
+<div class="wrap">
+  <div class="top"><h1>OPEN LATE</h1><span class="sub">Colorway board · FLUX.2 klein 4B renders</span></div>
+  <p class="note">The brief defines colour names only. Hex values are a provisional interpretation and will be confirmed with swatches. Product shots were rendered with the same seed, changing only the colour, and on-model shots put those product shots on a synthetic person. The people in the on-model shots are not real (label them "Virtual model" when posting externally).</p>
+  <div class="board">
+<article class="cw">
+  <header>
+    <div class="pair"><span class="sw" style="background:#5B3A29"></span><span class="sw" style="background:#A9CBE8"></span></div>
+    <div><h2>Chestnut <span>×</span> Sky</h2>
+    <p class="hex mono">Outer fabric #5B3A29 · lining and bartack thread #A9CBE8</p></div>
+  </header>
+  <div class="shots"><figure><img src="img/chestnut-sky_product.png" alt="Chestnut × Sky Product shot" loading="lazy"><figcaption>Product shot</figcaption></figure><figure><img src="img/chestnut-sky_onmodel.png" alt="Chestnut × Sky On-model shot · Virtual model" loading="lazy"><figcaption>On-model shot · Virtual model</figcaption></figure></div>
+  <div class="color">
+    <div class="cmp"><span class="sw sm" style="background:#5B3A29"></span><span class="mono">Target #5B3A29</span></div>
+    <div class="cmp"><span class="sw sm" style="background:#825445"></span><span class="mono">Render #825445</span></div>
+    <div class="de bad"><b class="mono">ΔE00 10.9</b> Large difference</div>
+  </div>
+</article>
+<article class="cw">
+  <header>
+    <div class="pair"><span class="sw" style="background:#4A4E2A"></span><span class="sw" style="background:#F2C6CF"></span></div>
+    <div><h2>Deep olive <span>×</span> Light pink</h2>
+    <p class="hex mono">Outer fabric #4A4E2A · lining and bartack thread #F2C6CF</p></div>
+  </header>
+  <div class="shots"><figure><img src="img/olive-pink_product.png" alt="Deep olive × Light pink Product shot" loading="lazy"><figcaption>Product shot</figcaption></figure><figure><img src="img/olive-pink_onmodel.png" alt="Deep olive × Light pink On-model shot · Virtual model" loading="lazy"><figcaption>On-model shot · Virtual model</figcaption></figure></div>
+  <div class="color">
+    <div class="cmp"><span class="sw sm" style="background:#4A4E2A"></span><span class="mono">Target #4A4E2A</span></div>
+    <div class="cmp"><span class="sw sm" style="background:#585544"></span><span class="mono">Render #585544</span></div>
+    <div class="de mid"><b class="mono">ΔE00 8.5</b> Noticeable difference</div>
+  </div>
+</article>
+<article class="cw">
+  <header>
+    <div class="pair"><span class="sw" style="background:#1E2A44"></span><span class="sw" style="background:#F4B488"></span></div>
+    <div><h2>Ink navy <span>×</span> Apricot</h2>
+    <p class="hex mono">Outer fabric #1E2A44 · lining and bartack thread #F4B488</p></div>
+  </header>
+  <div class="shots"><figure><img src="img/inknavy-apricot_product.png" alt="Ink navy × Apricot Product shot" loading="lazy"><figcaption>Product shot</figcaption></figure><figure><img src="img/inknavy-apricot_onmodel.png" alt="Ink navy × Apricot On-model shot · Virtual model" loading="lazy"><figcaption>On-model shot · Virtual model</figcaption></figure></div>
+  <div class="color">
+    <div class="cmp"><span class="sw sm" style="background:#1E2A44"></span><span class="mono">Target #1E2A44</span></div>
+    <div class="cmp"><span class="sw sm" style="background:#292E41"></span><span class="mono">Render #292E41</span></div>
+    <div class="de good"><b class="mono">ΔE00 3.6</b> Close</div>
+  </div>
+</article>
+<article class="cw">
+  <header>
+    <div class="pair"><span class="sw" style="background:#2A2A2C"></span><span class="sw" style="background:#F1E05A"></span></div>
+    <div><h2>Charcoal <span>×</span> Lemon</h2>
+    <p class="hex mono">Outer fabric #2A2A2C · lining and bartack thread #F1E05A</p></div>
+  </header>
+  <div class="shots"><figure><img src="img/ink-lemon_product.png" alt="Charcoal × Lemon Product shot" loading="lazy"><figcaption>Product shot</figcaption></figure><figure><img src="img/ink-lemon_onmodel.png" alt="Charcoal × Lemon On-model shot · Virtual model" loading="lazy"><figcaption>On-model shot · Virtual model</figcaption></figure></div>
+  <div class="color">
+    <div class="cmp"><span class="sw sm" style="background:#2A2A2C"></span><span class="mono">Target #2A2A2C</span></div>
+    <div class="cmp"><span class="sw sm" style="background:#47454A"></span><span class="mono">Render #47454A</span></div>
+    <div class="de mid"><b class="mono">ΔE00 9.3</b> Noticeable difference</div>
+  </div>
+</article></div>
+  <h3 class="obs">Observations</h3>
+  <ul class="foot">
+    <li><b>The product shots are usable.</b> With the same seed the composition stays consistent, and the lining colour and the flower bartack at the pocket corners show in all four. However, the flowers are drawn large, like embroidery, rather than as a thread bartack (1–1.5cm).</li>
+    <li><b>Only Ink navy gained a drawstring.</b> Even with the same seed, details change when the colour changes. A comparison board has to state details explicitly, for example "no drawstring".</li>
+    <li><b>Apricot came out orange.</b> It skews towards higher saturation.</li>
+    <li><b>The on-model shots ignore some instructions.</b> They ignored "hood down" and all four show the hood up, added a drawstring that was not in the product shots, and lost most of the flower bartacks. Small signature details drop out in the on-model composite.</li>
+    <li><b>Colours generally come out lighter.</b> Only Ink navy is close to the target (ΔE 3.6). Chestnut, Deep olive and Charcoal are noticeably off at 8.5–10.9.</li>
+  </ul>
+  <h3 class="obs">How to read this</h3>
+  <ul class="foot">
+    <li><b>ΔE00</b> is the difference between the target outer fabric colour and the colour at the centre of the rendered body panel. 1–2 is hard to tell apart by eye, 5 or more is immediately visible, and 10 or more reads as a different colour.</li>
+    <li>Renders are for checking direction only. Final colours are confirmed with swatches and a spectrophotometer.</li>
+    <li>The measurement is the median of a fixed patch at the centre of the body panel, so it is a rough value that mixes in lighting and shadow.</li>
+  </ul>
+</div></body></html>

@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OPEN LATE · Pipeline Review</title>
+<link rel="stylesheet" href="/static/tokens.css">
+<style>
+:root{
+  --ground:var(--bg); --paper:var(--panel); --ink:var(--t1); --mute:var(--t2); --faint:var(--t3);
+  --soft:var(--hover);
+  
+  --accent-soft:var(--accent-dim);
+  --lemon:#c9a227;       /* Lemon: lining of Charcoal */
+  --okb:rgba(26,127,55,.12);
+  --warnb:rgba(154,103,0,.13);
+  --badb:rgba(207,34,46,.11);
+  
+}
+body{line-height:1.65}
+.mono,code{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:.88em}
+code{background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:0 5px}
+a{color:var(--accent)}
+
+header.top{background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.top-in{max-width:1100px;margin:0 auto;padding:18px 16px 0}
+.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.brand .mark{font-weight:800;font-size:20px;letter-spacing:.16em}
+.brand .mark b{color:var(--accent)}
+.brand .sub{color:var(--mute);font-size:13px}
+.brand .date{margin-left:auto;color:var(--faint);font-size:12.5px}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:12px;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{font:inherit;font-size:14px;background:none;border:0;border-bottom:2px solid transparent;
+  color:var(--mute);padding:9px 13px 11px;cursor:pointer;white-space:nowrap}
+nav.tabs button:hover{color:var(--ink)}
+nav.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent);font-weight:650}
+nav.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:4px}
+
+main{max-width:1100px;margin:0 auto;padding:30px 16px 90px}
+section[role=tabpanel]{display:none}
+section[role=tabpanel].on{display:block}
+h2{font-size:24px;line-height:1.3;margin:0 0 6px;text-wrap:balance;letter-spacing:-.01em}
+.lede{color:var(--mute);margin:0 0 26px;max-width:68ch}
+h3{font-size:17px;margin:34px 0 10px;text-wrap:balance}
+h3 .n{color:var(--accent);font-family:ui-monospace,Menlo,monospace;font-size:13px;margin-right:8px}
+p{max-width:72ch}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:820px){.g2,.g3{grid-template-columns:1fr}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+.card h4{margin:0 0 6px;font-size:15px}
+.card p{margin:0;color:var(--mute);font-size:14px}
+.kpi{display:flex;flex-direction:column;gap:2px}
+.kpi .v{font-size:28px;font-weight:750;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.kpi .v small{font-size:14px;font-weight:600;color:var(--mute);margin-left:4px}
+.kpi .l{color:var(--mute);font-size:13px}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:18px 0}
+.callout p{margin:0}
+ul.tight{margin:8px 0;padding-left:20px}ul.tight li{margin:3px 0}
+
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--paper);margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;color:var(--mute);font-weight:650;background:var(--soft);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{display:inline-block;font-size:11.5px;font-weight:650;border-radius:99px;padding:1px 9px;white-space:nowrap}
+.c-keep{background:var(--okb);color:var(--ok)}
+.c-fix{background:var(--warnb);color:var(--warn)}
+.c-swap{background:var(--badb);color:var(--bad)}
+.c-no{background:var(--bad);color:#fff}
+.c-human{background:var(--accent-soft);color:var(--accent)}
+.c-auto{background:var(--soft);color:var(--mute);border:1px solid var(--line)}
+
+pre.flow{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px;overflow-x:auto;
+  font:13px/1.6 ui-monospace,Menlo,monospace;color:var(--ink)}
+pre.flow b{color:var(--accent);font-weight:700}
+figure{margin:0}
+figure img{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);background:#fff;display:block}
+figcaption{color:var(--mute);font-size:13px;margin-top:8px}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:820px){.vs{grid-template-columns:1fr}}
+.steps{counter-reset:s;list-style:none;padding:0;margin:12px 0}
+.steps li{counter-increment:s;position:relative;padding:12px 16px 12px 52px;background:var(--paper);border:1px solid var(--line);
+  border-radius:10px;margin-bottom:8px}
+.steps li::before{content:counter(s);position:absolute;left:16px;top:12px;width:24px;height:24px;border-radius:50%;
+  background:var(--accent);color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center}
+.steps li b{display:block}
+.src{color:var(--faint);font-size:12.5px}
+  border:1px solid var(--line);border-radius:99px;padding:6px 12px;cursor:pointer;box-shadow:var(--shadow)}
+@media (prefers-reduced-motion:no-preference){section[role=tabpanel].on{animation:in .18s ease-out}}
+@keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<header id="ol-shell" data-page="review"></header>
+<script src="/static/shell.js"></script>
+<header class="top"><div class="top-in">
+  <div class="brand">
+    <span class="mark">OPEN <b>LATE</b></span>
+    <span class="sub">AI Pipeline Review · Verifying the brief and an AI-native redesign</span>
+    <span class="date">2026-10-11</span>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Review sections">
+    <button role="tab" id="t-summary" aria-controls="summary">Summary</button>
+    <button role="tab" id="t-redesign" aria-controls="redesign">AI-native redesign</button>
+    <button role="tab" id="t-slice" aria-controls="slice">Node re-slice</button>
+    <button role="tab" id="t-verify" aria-controls="verify">Verifying the brief</button>
+    <button role="tab" id="t-models" aria-controls="models">Model placement</button>
+    <button role="tab" id="t-evidence" aria-controls="evidence">Experimental evidence</button>
+    <button role="tab" id="t-next" aria-controls="next">Risks · Next</button>
+  </nav>
+</div></header>
+
+<main>
+
+<!-- ============ Summary ============ -->
+<section role="tabpanel" id="summary" aria-labelledby="t-summary">
+  <h2>Don't automate the existing garment workflow. Remove it.</h2>
+  <p class="lede">The brief turned the human work sequence of design brief → flat sketch → tech pack → pattern maker → sample → QA → factory → inspection into 13 nodes. That sequence exists because people have to interpret each other's work and because physical samples have to be repeated. An AI-native approach removes those two constraints first.</p>
+
+  <div class="grid g3">
+    <div class="card kpi"><span class="v">11<small>/ 13</small></span><span class="l">Nodes a person touches today (9 approval + 2 contact)</span></div>
+    <div class="card kpi"><span class="v">2–3<small>times</small></span><span class="l">Human involvement per style after the redesign: borderline selection · wear feel · sending to vendors</span></div>
+    <div class="card kpi"><span class="v">1<small>per block</small></span><span class="l">One physical sample per block. Variants need 0–1 (2–3 per style in the existing plan)</span></div>
+  </div>
+
+  <h3>Three diagnoses</h3>
+  <div class="grid g3">
+    <div class="card"><h4>People touch too much</h4><p>The goal is "people only handle contact", yet approval is required on every run. Even after the hoodie is approved, the same judgement is made again for the half-zip.</p></div>
+    <div class="card"><h4>Nodes follow department lines</h4><p>A single node mixes judgement (design), calculation (measurement chart), derivation (PDF) and validation (measurement order), so the whole node needs approval.</p></div>
+    <div class="card"><h4>The most expensive loop does not learn</h4><p>A sample costs KRW 100,000–300,000 per round and takes 1–2 weeks. Yet sample results only pile up as text in rules.md and are not fed back into the pattern automatically.</p></div>
+  </div>
+
+  <h3>Conclusions</h3>
+  <ul class="tight">
+    <li>Treat <b>a garment as a program, not a document</b>. The flat sketch, pattern, BOM, size chart, product page and care label are all compiled outputs.</li>
+    <li>Validate <b>one block, not each style</b>, with a physical sample. Everything after that is a combination of parts, so code validates it.</li>
+    <li><b>The market and a taste model do the approving</b>, and people look only at what the model is unsure about.</li>
+    <li>Switch the pattern engine from GarmentCode to <b>FreeSewing</b>. In hands-on tests, FreeSewing was the only one with production markings (seam allowance, notches, grain, fold lines).</li>
+    <li><b>Five local open models</b> (about 38GB) are enough at runtime. Kanana is excluded.</li>
+  </ul>
+</section>
+
+<!-- ============ Redesign ============ -->
+<section role="tabpanel" id="redesign" aria-labelledby="t-redesign">
+  <h2>AI-native redesign: 13 nodes → 5 loops</h2>
+  <p class="lede">If no person has to interpret anything, documents are not needed. Predict what can be predicted, and make a physical sample only the one time it is truly needed.</p>
+
+<pre class="flow"> ┌─ <b>Learn</b> (always on) ──────────────────────────────────────────────────────┐
+ │  Waitlist body data · wear feedback · return reasons   →  fit model      │
+ │  Approval and rejection records · Instagram reactions  →  taste model    │
+ │  Fabric measurements (shrinkage · stretch · drape)     →  fabric profile │
+ └───────────────────────┬──────────────────────────────────────────────────┘
+                         ▼
+ <b>Generate</b>  Block + parts + colorway = N garment program variants + renders
+                         ▼
+ <b>Select</b>    Brand constitution (code) → taste model → demand test → top k
+           People: only what the model is unsure about
+                         ▼
+ <b>Make</b>      Compile → vendor link → physical sample (once per block) → measure → auto-correct
+           People: one wear check · vendor relationships
+                         ▼
+ <b>Sell</b>      Product page · size recommendation · automated CS → return reasons → back to Learn</pre>
+
+  <h3><span class="n">01</span>A garment is a program, not a document</h3>
+  <p>The flat sketch, tech pack, pattern DXF, BOM, costing, size chart, product page, care label and size recommendation all compile from one garment program. Nodes 2, 4, 5, the care and content label node, and 12a from the brief disappear entirely. A change is one program diff.</p>
+
+  <h3><span class="n">02</span>Design one block, not each style</h3>
+  <p>The real asset is the body block (the fit DNA) shared by the hoodie, sweatshirt and half-zip. A physical sample validates it once per block. A style is a validated block plus parts (hood, zipper, pocket), so code only has to validate the differences from the block.</p>
+
+  <h3><span class="n">03</span>Set sizes from customer body data</h3>
+  <p>The waitlist collects height, weight, usual size and fit preference. Three gender-neutral sizes are an optimisation problem: find the three boundaries that best cover the body distribution. The same data sets the production quantity per size and the size recommendation.</p>
+
+  <h3><span class="n">04</span>The market and a taste model do the approving</h3>
+  <ul class="tight">
+    <li><b>Market</b>: Make photorealistic renders of the candidates (klein 4B) and watch the reaction on Instagram and the waitlist. Only the winners go to sample.</li>
+    <li><b>Taste model</b>: Train an "OPEN LATE-ness" scoring model on approval and rejection records and references. Clear cases pass automatically, and only borderline cases are asked about (active learning).</li>
+    <li><b>Brand constitution</b>: Rules such as the matte finish, outer fabric × lining colour pairs and flower bartack placement are written once and checked by code.</li>
+  </ul>
+
+  <h3><span class="n">05</span>Measurement → auto-correction instead of sample QA</h3>
+  <p>When the physical sample arrives, enter on-body photos, a phone 3D scan and a few hand measurements, and the program corrects the ease and grade by itself. Fabric is measured once at the start, and shrinkage compensation goes into the pattern automatically. The only thing left for a person is "how it feels to wear".</p>
+
+  <h3><span class="n">06</span>Vendor contact is one link, not a relay</h3>
+  <p>Vendors download the package from a link and upload corrected DXFs, photos and quotes. An agent parses them and applies them to the program. Batching several styles cuts sample room round trips.</p>
+
+  <h3><span class="n">07</span>Photo shoots and CS are program outputs too</h3>
+  <p>One real hero photo plus the program produces on-model shots per colorway and fit visualisations per size (labelled "Virtual model"). The size recommendation goes on the product page first, so most customer support (CS) requests never arise.</p>
+
+  <h3>Before and after (per style)</h3>
+  <div class="tbl"><table>
+    <tr><th></th><th>Existing brief</th><th>AI-native</th></tr>
+    <tr><td>Human involvement</td><td>11 nodes</td><td>2–3 times</td></tr>
+    <tr><td>Samples</td><td>2–3 rounds (KRW 100,000–300,000 per round)</td><td>1 per block, then 0–1 per variant</td></tr>
+    <tr><td>Design decisions</td><td>The owner's gut feel</td><td>Market reaction + taste model + people only for borderline cases</td></tr>
+    <tr><td>Sizing</td><td>Conventional 1·2·3</td><td>Optimised for the customer body distribution</td></tr>
+    <tr><td>Production quantity</td><td>Gut feel</td><td>Waitlist size distribution</td></tr>
+    <tr><td>Documents</td><td>Written and corrected by people</td><td>Compiled from the program</td></tr>
+    <tr><td>Learning</td><td>rules.md text</td><td>Fit, taste and fabric models update every cycle</td></tr>
+  </table></div>
+</section>
+
+<!-- ============ Re-slice ============ -->
+<section role="tabpanel" id="slice" aria-labelledby="t-slice">
+  <h2>Node re-slice and approval inheritance</h2>
+  <p class="lede">Even if the redesign cannot happen all at once, just splitting the existing nodes greatly widens what can be automated. Every step falls into one of five types.</p>
+
+  <div class="tbl"><table>
+    <tr><th>Type</th><th>Who</th><th>Approval</th></tr>
+    <tr><td>Generate</td><td>Model</td><td>Only when the result is a judgement call</td></tr>
+    <tr><td>Derive</td><td>Code (spec → PDF · DXF · tables)</td><td><span class="chip c-auto">None</span></td></tr>
+    <tr><td>Validate</td><td>Code (rules · tolerances)</td><td><span class="chip c-auto">None; stops on failure</span></td></tr>
+    <tr><td>Decide</td><td>Person or policy</td><td>A person only when policy cannot settle it</td></tr>
+    <tr><td>Contact</td><td>Person</td><td>—</td></tr>
+  </table></div>
+
+  <h3>Splitting each node</h3>
+  <div class="tbl"><table>
+    <tr><th>Node in the brief</th><th>Result of the split</th><th>What is left for people</th></tr>
+    <tr><td>2 Flat sketch · spec</td><td>2a design selection (model, within a set of options) · 2b measurement chart (code: block + grade rules) · 2c document derivation · 2d validation</td><td>2a only. The model does not produce measurements</td></tr>
+    <tr><td>3 Fabric sourcing</td><td>Full-package production, so the factory sources the fabric. Required fabric spec (gsm · fibre content · shrinkage tolerance · test standards) + checking replies against it</td><td>Whether to accept the fabric offered</td></tr>
+    <tr><td>4 Pattern generation</td><td>4a <b>spec-fitting solver</b> · 4b production layer (grain · notch correction) · 4c DXF derivation · 4d validation</td><td><span class="chip c-auto">None</span></td></tr>
+    <tr><td>5 Simulation check</td><td>Deleted. Absorbed into 4d (measurements taken from the pattern ↔ spec)</td><td><span class="chip c-auto">None</span></td></tr>
+    <tr><td>6 Sewing spec</td><td>Library of defaults per garment area applied automatically + only changes shown</td><td>First style only, then inherited</td></tr>
+    <tr><td>8 Sample QA</td><td>8a measurement entry · 8b spec comparison (tolerance table) · 8c defect detection · 8d change request · 8e <b>parameter correction proposal → 4a</b></td><td>Wear feel only</td></tr>
+    <tr><td>9 Colorways</td><td>Palette rules (outer fabric × lining contrast, "lit window" colour range) narrow it to 3 candidates</td><td>Choosing from the 3 · swatch</td></tr>
+    <tr><td>10 Factory order</td><td>Quote OCR → cost and margin calculation (markup 2.5–3×) → comparison table</td><td>Contact · order decision</td></tr>
+    <tr><td>11 Inspection</td><td>AQL sample size (ISO 2859-1) · OCR check of label fibre content · defect detection</td><td>Exceptions only</td></tr>
+    <tr><td>12 Merchandising · CS</td><td>Size chart by code from the spec, copy by a model · routine CS questions answered automatically by rules</td><td>First approval of the template · exception CS</td></tr>
+  </table></div>
+
+  <div class="callout"><p><b>The 4a spec-fitting solver is the biggest opportunity.</b> Generate the pattern → measure finished dimensions from the pattern → adjust ease and body-shape parameters by the gap from the spec → regenerate, looping automatically until the result is within tolerance. This replaces the pattern maker's manual iteration, and once 8e measured corrections come in, it gets more accurate with every sample.</p></div>
+
+  <h3>Move approval from the run level to the asset level</h3>
+  <div class="tbl"><table>
+    <tr><th>Approved item</th><th>Once approved</th><th>Auto-pass condition after that</th></tr>
+    <tr><td>Base block (hoodie body)</td><td>Inherited by the half-zip and sweatshirt</td><td>Changes from the block are within the allowed range</td></tr>
+    <tr><td>Sewing spec library</td><td>All styles</td><td>No new garment areas</td></tr>
+    <tr><td>Colour palette</td><td>All colorways</td><td>Colours inside the palette</td></tr>
+    <tr><td>Product page template</td><td>All products</td><td>Only slots change</td></tr>
+    <tr><td>CS policy</td><td>All routine questions</td><td>Cases covered by the policy</td></tr>
+  </table></div>
+  <p>Only the first style needs 9 approvals. From the second style on, that drops to 2–3 (design selection · wear feel · launch).</p>
+
+  <h3>Automation missing from the brief</h3>
+  <div class="grid g2">
+    <div class="card"><h4>Size recommendation</h4><p>Height, weight, usual size → 1·2·3. Calculated from the finished measurements in the spec. It has a big effect because there are three gender-neutral sizes.</p></div>
+    <div class="card"><h4>Production quantity planning</h4><p>Order ratios from the waitlist size distribution. This does the most to reduce inventory risk on a small first run.</p></div>
+    <div class="card"><h4>Cost and margin</h4><p>It is in the script list but has no node. BOM + quote → cost → markup check.</p></div>
+    <div class="card"><h4>Returns → fit feedback</h4><p>Collect return reasons ("too big", "sleeves too long") by size and turn them into grade correction proposals.</p></div>
+    <div class="card"><h4>Fabric and wash testing</h4><p>A node that measures "sturdiness that does not change with washing". Shrinkage (ISO 5077) · pilling (ISO 12945) · colour fastness (ISO 105-C06).</p></div>
+    <div class="card"><h4>Care and content label · disclosures</h4><p>Fibre content, country of manufacture, year and month of manufacture and care instructions are legally required. Generated directly from the spec.</p></div>
+  </div>
+
+  <h3>Wording changes to the brief</h3>
+  <ul class="tight">
+    <li>Record rejection reasons as a <b>reason code + numbers + a note</b> instead of free text. Text is for prompts only.</li>
+    <li>Sample pass: code decides the measurement pass from the tolerance table, and people judge only wear feel and appearance.</li>
+    <li>Node 5: VLM comparison of simulation renders → comparison of pattern measurements.</li>
+    <li>Hosting: OpenRouter by default → local by default, with OpenRouter as the outage fallback.</li>
+  </ul>
+</section>
+
+<!-- ============ Verification ============ -->
+<section role="tabpanel" id="verify" aria-labelledby="t-verify">
+  <h2>Node-by-node verification of the brief</h2>
+  <p class="lede">These are verdicts on the nodes exactly as the brief has them. The evidence is HF, GitHub and PyPI metadata, experiments run directly on this Mac Studio, and secondary sources.</p>
+
+  <div class="tbl"><table>
+    <tr><th>#</th><th>Node</th><th>Model · tool in the brief</th><th>Verdict</th><th>Evidence</th><th>Recommendation</th></tr>
+    <tr><td class="num">1</td><td>Design brief · concepts</td><td>Qwen3.6 · klein 4B</td><td><span class="chip c-fix">Fix</span></td><td>klein 4B is Apache-2.0. Edit measured at 34 s · 11.8GB</td><td>Keep + brand style LoRA</td></tr>
+    <tr><td class="num">2</td><td>Flat sketch · spec</td><td>Qwen3.6 (JSON)</td><td><span class="chip c-fix">Fix</span></td><td>The mlx-lm server does not enforce JSON schemas (v0.32.0)</td><td>Constrained decoding with outlines · xgrammar. Measurements come from code</td></tr>
+    <tr><td class="num">3</td><td>Fabric sourcing</td><td>Qwen3.6 + template</td><td><span class="chip c-keep">Keep</span></td><td>Text + template, low risk</td><td>Add test requirements</td></tr>
+    <tr><td class="num">4</td><td>Pattern generation</td><td>pygarment · ezdxf</td><td><span class="chip c-swap">Replace</span></td><td>No seam allowance, notches, grain or grading. Sleeve split in half. Seam topology changes with size</td><td>FreeSewing + ezdxf</td></tr>
+    <tr><td class="num">5</td><td>Pattern simulation check</td><td>GarmentCode simulation · VLM</td><td><span class="chip c-no">Not usable</span></td><td>The Warp fork has a non-commercial license. On macOS the simulation silently does nothing (issue #60)</td><td>Compare pattern measurements (code)</td></tr>
+    <tr><td class="num">6</td><td>Sewing spec selection</td><td>3D viewer</td><td><span class="chip c-fix">Fix</span></td><td>Clicking on a 2D SVG works right away</td><td>2D first, library of defaults</td></tr>
+    <tr><td class="num">7</td><td>Handoff to sample room</td><td>Person</td><td><span class="chip c-keep">Keep</span></td><td>—</td><td>Package and question list automated</td></tr>
+    <tr><td class="num">8</td><td>Sample QA</td><td>Hand measurement · Qwen vision</td><td><span class="chip c-swap">Replace</span></td><td>Measuring from photos has ≈ 1cm error vs. a ±1–2cm tolerance. No VLM benchmark for sewing defects</td><td>Measurement form + AnomalyDINO → VLM → person</td></tr>
+    <tr><td class="num">9</td><td>Colorways</td><td>Mask + klein</td><td><span class="chip c-fix">Fix</span></td><td>Phone photos: ΔE00 11.7–42.3. Colour cannot be finalised from photos</td><td>LCh conversion + lab dips measured with a spectrophotometer</td></tr>
+    <tr><td class="num">10</td><td>Factory order</td><td>Person</td><td><span class="chip c-keep">Keep</span></td><td>—</td><td>Quote comparison automated</td></tr>
+    <tr><td class="num">11</td><td>Inspection</td><td>PaddleOCR-VL · VLM</td><td><span class="chip c-fix">Fix</span></td><td>PaddleOCR-VL is Apache-2.0 and explicitly lists Korean</td><td>A/B against GravityOCR-KO (MIT)</td></tr>
+    <tr><td class="num">12</td><td>Merchandising · CS</td><td>Kanana-2 / Qwen</td><td><span class="chip c-swap">Replace</span></td><td>Kanana license: mandatory "Powered by Kanana" credit → clashes with the brand tone</td><td>Qwen3.6 + A.X-3.1 · Gravity A/B</td></tr>
+    <tr><td class="num">13</td><td>Trademark watch</td><td>KIPRIS Plus</td><td><span class="chip c-fix">Fix</span></td><td>The trademark API needs a separate usage application</td><td>Keep</td></tr>
+  </table></div>
+
+  <h3>Factual corrections to the brief</h3>
+  <ul class="tight">
+    <li>Qwen3.6-27B is not a separate vision model. 35B-A3B also accepts images, so there is no need for a separate vision model.</li>
+    <li>GarmentoPIA has not released its code, and SwiftTailor has no code or weights link.</li>
+    <li>No try-on LoRA for klein 4B was found. The try-on LoRAs that were confirmed are based on 9B, so they are non-commercial.</li>
+    <li>DXF R12 has no units header. Units have to go in as text, as AAMA does, to prevent the problem of "unit errors appearing silently".</li>
+  </ul>
+
+  <h3>Operations · Code · Usability</h3>
+  <div class="grid g3">
+    <div class="card"><h4>Operations</h4><p>One Mac is a single point of failure. Batch nodes are fine, but CS needs an always-on response, so there has to be a fallback. Pin the model list in a lock file so the cache does not fill the disk.</p></div>
+    <div class="card"><h4>Code</h4><p>Generate the JSON Schema for spec.json from Pydantic. Constrained decoding, validation and forms all share the same schema. Cache node outputs by input hash. A file-based state machine is enough for the orchestrator.</p></div>
+    <div class="card"><h4>Usability</h4><p>Group the 9 approval points into 3 reviews (design · sample · launch). The approval screen shows only an automated validation summary, the diff from the previous version, and one line on what to decide.</p></div>
+  </div>
+</section>
+
+<!-- ============ Models ============ -->
+<section role="tabpanel" id="models" aria-labelledby="t-models">
+  <h2>Models to use in the nodes</h2>
+  <p class="lede">All open weights, run locally. The core set totals about 38GB, so it all loads at once on an M4 Max with 128GB.</p>
+  <div class="tbl"><table>
+    <tr><th>Model</th><th>Size</th><th>License</th><th>Nodes</th><th>Notes</th></tr>
+    <tr><td><b>Qwen3.6-35B-A3B</b> 4bit</td><td class="num">20.4GB</td><td>Apache-2.0</td><td>1 · 2 · 3 · 8 · 11 · 12</td><td>Native VLM. Fast because only 3B are active. One model for text + images</td></tr>
+    <tr><td><b>FLUX.2 klein 4B</b></td><td class="num">15GB</td><td>Apache-2.0</td><td>1 · 9 · 12</td><td>9B and LoRAs based on 9B are excluded because they are non-commercial</td></tr>
+    <tr><td><b>PaddleOCR-VL-1.5</b> / <b>GravityOCR-KO</b></td><td class="num">1–2GB</td><td>Apache-2.0 / MIT</td><td>11</td><td>Pick one through A/B</td></tr>
+    <tr><td><b>SAM 3</b> 8bit</td><td class="num">1GB</td><td>SAM License (commercial use allowed)</td><td>8 · 9</td><td>Segments garment areas from text</td></tr>
+    <tr><td><b>DINOv2</b> + AnomalyDINO</td><td class="num">&lt;0.5GB</td><td>Apache-2.0</td><td>8 · 11</td><td>Detects defects from a few normal samples, with no training</td></tr>
+  </table></div>
+
+  <h3>A/B candidates (only when testing)</h3>
+  <ul class="tight">
+    <li>Qwen3.8-27B (dense VLM, Apache-2.0, 16GB) — hard vision reading tasks</li>
+    <li>SKT A.X-3.1 (Apache-2.0) · Trillion Gravity-30B-A5B (Apache-2.0) — Korean CS</li>
+  </ul>
+
+  <h3>Not used</h3>
+  <ul class="tight">
+    <li>Kanana-2 — mandatory "Powered by Kanana" credit, naming rules for derivative models, separate contract for API resale</li>
+    <li>EXAONE 4.5 — non-commercial (NC)</li>
+    <li>FLUX.2 dev · klein 9B — non-commercial</li>
+  </ul>
+
+  <h3>Training plan: once approval data accumulates, train on that</h3>
+  <div class="tbl"><table>
+    <tr><th>Target</th><th>Method</th><th>Start condition</th></tr>
+    <tr><td>Taste model</td><td>DINOv2/v3 embeddings + preference head (Bradley-Terry)</td><td>50–100 approval and rejection records</td></tr>
+    <tr><td>Brand mood images</td><td>klein base 4B LoRA (mflux-train)</td><td>20–40 approved mood images</td></tr>
+    <tr><td>Defect detection</td><td>No training, memory bank</td><td>20–50 normal shots</td></tr>
+    <tr><td>Korean CS tone</td><td>LoRA SFT (mlx-lm)</td><td>200–500 approved response pairs</td></tr>
+    <tr><td>Fit model · size boundaries</td><td>Optimisation (not training)</td><td>Waitlist body data + public body measurement data</td></tr>
+  </table></div>
+</section>
+
+<!-- ============ Evidence ============ -->
+<section role="tabpanel" id="evidence" aria-labelledby="t-evidence">
+  <h2>Experimental evidence</h2>
+  <p class="lede">The experiments behind these judgements were run directly on this Mac Studio (M4 Max, 128GB).</p>
+
+  <h3>Pattern engine: GarmentCode vs FreeSewing</h3>
+  <div class="vs">
+    <figure><img src="img/garmentcode_hoodie.png" alt="Three-size hoodie panels made by GarmentCode. The sleeve is split into front and back halves, with no seam allowance or notches">
+      <figcaption><b>GarmentCode</b> · sizes 1·2·3. Sleeve split front/back, no seam allowance, notches or grain, no pocket or rib. Seams change from 20 → 22 at sizes 2·3.</figcaption></figure>
+    <figure><img src="img/freesewing_hugo_dxf.png" alt="FreeSewing Hugo hoodie converted to DXF. Cut lines, seam lines, notches, grain lines and fold lines are marked">
+      <figcaption><b>FreeSewing Hugo</b> → DXF. One-piece raglan sleeve, front and back cut on the fold, pocket, three-piece hood, rib (hem · cuff). 10mm seam allowance · notches · grain · fold lines.</figcaption></figure>
+  </div>
+
+  <div class="tbl"><table>
+    <tr><th>Check</th><th>GarmentCode</th><th>FreeSewing</th></tr>
+    <tr><td>Runs on Apple Silicon</td><td>Yes</td><td>Yes (Node, headless)</td></tr>
+    <tr><td>Seam allowance · notches · grain · fold lines</td><td>None (0 grep hits in the code)</td><td>Yes</td></tr>
+    <tr><td>Cutting units</td><td>Split for simulation</td><td>Real cutting pieces</td></tr>
+    <tr><td>Fabric separation</td><td>None</td><td>Separates outer fabric / rib (various)</td></tr>
+    <tr><td>License</td><td>MIT, simulation fork is non-commercial</td><td>MIT</td></tr>
+    <tr><td>Automated checks (Hugo)</td><td>—</td><td>148 of 154 passed. The gate caught a missing grain line on the pocket facing</td></tr>
+    <tr><td>DXF round-trip error</td><td>0.0000mm</td><td>Layers 1 · 14 · 4 · 7 · 6 · 15</td></tr>
+  </table></div>
+
+  <h3>Render: FLUX.2 klein 4B on-model image</h3>
+  <div class="grid g3">
+    <figure><img src="img/tryon_avatar.png" alt="Synthetic person: grey sleeveless top and charcoal shorts"><figcaption>Input 1 · synthetic person</figcaption></figure>
+    <figure><img src="img/tryon_garment.png" alt="Flat lay of a red cable-knit sweater"><figcaption>Input 2 · garment</figcaption></figure>
+    <figure><img src="img/tryon_result.png" alt="The same person wearing the red cable knit"><figcaption>Result · q4, 4 steps, 34 s, 11.8GB peak. Face, background and bottoms preserved</figcaption></figure>
+  </div>
+  <p class="src">q8 at 4 steps (38.5 s) and q4 at 8 steps (66.5 s) show almost no quality difference → q4 at 4 steps is the most efficient.</p>
+
+  <h3>The validators need validating too</h3>
+  <ul class="tight">
+    <li>In the GarmentCode check, seam lengths appeared to be off by 28–38mm → the cause was an error in the validation script, which approximated arcs as straight lines.</li>
+    <li>The FreeSewing check flagged the open cut lines of on-fold pieces as failures → fixed so they pass when the endpoints lie on the fold line.</li>
+    <li>Lesson: test validation scripts separately against hand-calculated golden cases.</li>
+  </ul>
+</section>
+
+<!-- ============ Risks · Next ============ -->
+<section role="tabpanel" id="next" aria-labelledby="t-next">
+  <h2>Risks and next experiments</h2>
+
+  <h3>What AI cannot replace</h3>
+  <div class="grid g3">
+    <div class="card"><h4>Hand feel and wear feel</h4><p>How the fabric feels to the touch and how it sits on the body. A person wears it once per block.</p></div>
+    <div class="card"><h4>Vendor trust</h4><p>Early relationships with sample rooms and factories are a person's job. A link only reduces the contact.</p></div>
+    <div class="card"><h4>Render demand tests</h4><p>If the render differs from the real garment, it is deception. State "upcoming design", use the Virtual model label, and show final products in real photos.</p></div>
+  </div>
+
+  <h3>Regulatory checks</h3>
+  <ul class="tight">
+    <li>Household textile products: in the "safety standard compliance" category. There is no KC certification, but fibre content, manufacturer, country of manufacture, year and month of manufacture, size and care instructions must be labelled.</li>
+    <li>Korea Fair Trade Commission (KFTC) endorsement and testimonial review guidelines, amended 2026-06-01: when an AI Virtual model recommends or endorses a product, it must carry the "Virtual model" label. Cases with only on-model shots are unclear, so labelling is recommended (secondary source).</li>
+    <li>Trademark: a US registration for OPEN LATE exists in Class 25. File first in Korea in Class 25 (same as the brief).</li>
+  </ul>
+
+  <h3>Test the riskiest assumptions first</h3>
+  <ol class="steps">
+    <li><b>How much of the body distribution do three sizes cover?</b>Optimise the three gender-neutral size boundaries on public body measurement data (Size Korea) and measure the coverage. This is the premise of redesign 03.</li>
+    <li><b>Does the spec-fitting solver converge?</b>Check whether adjusting FreeSewing options reaches the target finished measurements (chest · length · sleeve) within tolerance. This is the premise of redesign 01 and 05.</li>
+    <li><b>Will the sample room accept our DXF?</b>Get a sample DXF, match its layers, units and notch format, and compare on a round trip. This is the premise of the production path.</li>
+    <li><b>Does the taste model predict approvals?</b>Train a preference head on reference brand images + the first 50 approval and rejection records, and check accuracy on a held-out set. This is the premise of redesign 04.</li>
+  </ol>
+
+  <h3>Questions for the sample room</h3>
+  <ul class="tight">
+    <li>Which CAD and DXF formats they accept (AAMA / ASTM, AutoCAD version) — ask for 1 sample DXF</li>
+    <li>How units are marked · notch shape (V / slit / T) and layers</li>
+    <li>Whether seam allowance is included · how on-fold pieces are marked (unfolded piece vs half + fold line)</li>
+    <li>Who handles grading and marking, and whether a grade rule file is needed</li>
+    <li>Sample measurement tolerance per POM</li>
+  </ul>
+
+  <h3>Metrics that show whether automation is working</h3>
+  <div class="grid g2">
+    <div class="card kpi"><span class="v">≤ 3</span><span class="l">Human clicks per style (from the second style on)</span></div>
+    <div class="card kpi"><span class="v">1–2</span><span class="l">Sample rounds per style</span></div>
+    <div class="card kpi"><span class="v">Days</span><span class="l">Design brief → approved sample</span></div>
+    <div class="card kpi"><span class="v">%</span><span class="l">Return rate by size: shows whether the fit loop is working</span></div>
+  </div>
+</section>
+
+</main>
+
+
+<script>
+(() => {
+  const tabs = [...document.querySelectorAll('[role=tab]')];
+  const show = (id, focus) => {
+    const t = tabs.find(b => b.getAttribute('aria-controls') === id) || tabs[0];
+    tabs.forEach(b => {
+      const on = b === t;
+      b.setAttribute('aria-selected', on);
+      b.tabIndex = on ? 0 : -1;
+      document.getElementById(b.getAttribute('aria-controls')).classList.toggle('on', on);
+    });
+    if (focus) t.focus();
+    try { history.replaceState(null, '', '#' + t.getAttribute('aria-controls')); } catch (e) {}
+    window.scrollTo({ top: 0 });
+  };
+  tabs.forEach((b, i) => {
+    b.addEventListener('click', () => show(b.getAttribute('aria-controls')));
+    b.addEventListener('keydown', e => {
+      const k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (k) { e.preventDefault(); show(tabs[(i + k + tabs.length) % tabs.length].getAttribute('aria-controls'), true); }
+    });
+  });
+  show(location.hash.slice(1) || 'summary');
+})();
+</script>
+</body>
+</html>
