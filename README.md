@@ -52,7 +52,7 @@ research/      model and training lab (submodule)
 
 Early prototype, for local use only: the services have no authentication.
 
-- Runners exist for pattern generation and colorways. The other nodes are defined but not built.
+- Pattern generation runs from the console. Colorways run from a host script and report back. The other nodes are defined but not built.
 - The size chart is a placeholder until real body data replaces it.
 - Size comparison uses numbers. The draped images are not in the fitting room yet.
 
