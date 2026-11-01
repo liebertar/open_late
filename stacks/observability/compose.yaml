@@ -1,0 +1,27 @@
+# MLflow for run metrics (node durations, check pass rates, model A/B results).
+# default: sqlite + local files. profile "full": Postgres + MinIO (S3) backend.
+services:
+  mlflow:
+    build: ./mlflow
+    command: >
+      mlflow server --host 0.0.0.0 --port 5000
+      --backend-store-uri sqlite:////mlruns/mlflow.db
+      --artifacts-destination /mlruns/artifacts --serve-artifacts
+    ports: ["127.0.0.1:5060:5000"]
+    volumes: ["mlflow-data:/mlruns"]
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest   # pin a digest once MinIO is actually used
+    profiles: ["full"]
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-openlate}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-openlate-secret}
+    ports: ["127.0.0.1:9100:9000", "127.0.0.1:9101:9001"]
+    volumes: ["minio-data:/data"]
+    restart: unless-stopped
+
+volumes:
+  mlflow-data:
+  minio-data:
