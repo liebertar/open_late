@@ -1,0 +1,24 @@
+id: fitting.view
+version: 1
+model: FLUX.2 klein 4B (edit, 2 references)
+format: English prose, references named by position, the angle stated first after the subject, positive phrasing
+note: >-
+  Rotation views of a finished try-on. References: the front try-on (identity, body, garment as worn) and the garment
+  product photo. Only 45/90/135/180 are rendered; the viewer mirrors 135/90/45 for 225/270/315. The garment back is
+  invented by the model until a back product photo exists (then pass it as a third reference for 135/180).
+template: >-
+  The same {person} from the first image, {view}. Same face, hair, body shape and height, the same hoodie from the
+  second image with the same colours, hood lining, ribbed cuffs and hem, the same underwear, barefoot, arms relaxed at
+  {pos} sides. Same seamless grey backdrop and soft even studio light, the whole body from head to feet in frame.
+  Photorealistic catalog photo.
+parts:
+  person: {female: woman, male: man}
+  pos: {female: her, male: his}
+  view:
+    "045": the whole body and head turned 45 degrees to {pos} left, a three-quarter front view
+    "090": the whole body turned 90 degrees to {pos} left, a full side profile view
+    "135": turned 135 degrees to {pos} left, a three-quarter back view
+    "180": turned around 180 degrees, seen fully from the back, the hood lying flat on {pos} back
+changelog:
+  - "1: from the rotation research (6-8 snapped stills on the existing klein engine). Test on one try-on: 90/135/180 read
+    clearly; 45 turned mostly the head, so the 45 wording now names the whole body"

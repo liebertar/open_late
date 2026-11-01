@@ -1,0 +1,156 @@
+# OPEN LATE pipeline. 16 nodes = 13 from the plan PDF + 3 added in docs/review.md (added: true).
+# gate:   approve = I approve (the button opens only after automated checks pass)
+#         auto    = proceeds on its own, stops if checks fail
+#         contact = a person contacts the sample room or factory
+# review: which bundled review shows this node (design / sample / launch)
+# artifact: page that shows this node's output (only when there is one)
+nodes:
+  - id: n01
+    name: Brief and concepts
+    gate: approve
+    review: design
+    model: Qwen3.6-35B-A3B · FLUX.2 klein 4B
+    desc: Sets this style's direction in writing from the brand constitution and references, and renders concept images.
+    in: brand constitution · references
+    out: brief.md · concept.png
+
+  - id: n02
+    name: Flats and spec
+    gate: approve
+    review: design
+    model: Qwen3.6-35B-A3B (constrained decoding) + script
+    desc: Pins the design choices into a single spec.json. Measurements come from the block and grade rules in code, and the tech pack and flats are derived from the spec.
+    in: brief.md · grade_rules.json
+    out: spec.json → techpack.pdf · flat.svg · techpack.xlsx
+
+  - id: n03
+    name: Fabric sourcing
+    gate: approve
+    review: design
+    model: Qwen3.6-35B-A3B + template
+    desc: Produces the required fabric spec (weight in gsm, fiber content, shrinkage tolerance, test criteria) and a swatch request. Production is full-package, so the factory handles procurement.
+    in: spec.json
+    out: fabric_spec.json · swatch_request.pdf
+
+  - id: n03g
+    name: Grade rules
+    gate: approve
+    review: design
+    added: true
+    model: Script
+    desc: Sets the measurement increments between sizes 1, 2, and 3 for each POM. Checks that every measurement is 1 < 2 < 3.
+    in: body-shape data · spec.json
+    out: grade_rules.json
+
+  - id: n04
+    name: Pattern generation
+    gate: auto
+    review: design
+    runnable: true
+    model: FreeSewing (Hugo/Sven) · ezdxf
+    desc: Generates patterns in 5 sizes, XS-XL, converts them to DXF for the sample room, then runs automated checks (cut line, finished line, grain direction, fold line, fabric, units, identical pieces across sizes).
+    in: spec.json · grade_rules.json
+    out: pattern_s1~s3.svg/.dxf · checks.json
+
+  - id: n05
+    name: Pattern measurement check
+    gate: auto
+    review: design
+    model: Script (POM comparison)
+    desc: Measures finished dimensions directly from the pattern and checks that they match the spec within tolerance. Replaces the simulation check in the brief.
+    in: pattern_s*.dxf · spec.json
+    out: pom_report.json
+
+  - id: n06
+    name: Construction spec selection
+    gate: approve
+    review: sample
+    model: 2D panel click viewer
+    desc: Sets the ISO 4915 stitch number, inside/outside, and thread color for each seam. A default library fills these in automatically, and a person picks only what changes.
+    in: pattern_s2.svg
+    out: construction.json
+
+  - id: n07
+    name: Sample room handoff
+    gate: contact
+    review: sample
+    model: Human
+    desc: Builds the tech pack, DXF, and BOM package and a list of questions to ask the vendor. A person does the sending.
+    in: techpack · pattern · construction.json
+    out: package.zip · email draft
+
+  - id: n08
+    name: Sample QA
+    gate: approve
+    review: sample
+    model: Measurement form · AnomalyDINO · Qwen3.6-35B-A3B
+    desc: Compares measurements and photos against the spec, detects defects, and produces a revision request. Measurement corrections go back to pattern generation.
+    in: sample photos · measure.csv · spec.json
+    out: qa_report.json · revision.pdf
+
+  - id: n08w
+    name: Fabric and wash testing
+    gate: approve
+    review: sample
+    added: true
+    model: Script
+    desc: Requests shrinkage (ISO 5077), pilling (ISO 12945), and wash colorfastness (ISO 105-C06) tests and compares the results with the criteria.
+    in: fabric_spec.json · test reports
+    out: test_request.pdf · test_result.json
+
+  - id: n09
+    name: Colorways
+    gate: approve
+    review: launch
+    model: FLUX.2 klein 4B (direction) · LCh conversion
+    desc: Renders outer fabric × lining combinations to choose a direction. Render colors differ from the real thing, so final colors are confirmed with swatches and a colorimeter.
+    in: spec.json · colorway definitions
+    out: colorway_*.png · measure.json
+    artifact: /colorways/
+
+  - id: n10
+    name: Factory order
+    gate: contact
+    review: launch
+    model: Human · OCR · script
+    desc: Extracts quotes into a table and calculates cost and margin (2.5-3x markup). A person makes the order decision and does the contacting.
+    in: quotes · BOM
+    out: quote_compare.xlsx · po.pdf
+
+  - id: n11
+    name: Inspection
+    gate: auto
+    review: launch
+    model: PaddleOCR-VL · GravityOCR-KO · AnomalyDINO
+    desc: Calculates the AQL sample size, reads the fiber content on labels with OCR and compares it with the spec, and detects defects. Reports exceptions only.
+    in: production photos · label photos
+    out: qc_report.md
+
+  - id: n11l
+    name: Care and content label and notice
+    gate: approve
+    review: launch
+    added: true
+    model: Script (generated from spec.json)
+    desc: Produces legally required labeling, such as fiber content, manufacturer, country of manufacture, year and month of manufacture, size, and handling precautions, plus the product information notice, from the spec.
+    in: spec.json · fabric_spec.json
+    out: care_label.pdf · product_notice.json
+
+  - id: n12
+    name: Merchandising and CS
+    gate: approve
+    review: launch
+    model: Qwen3.6-35B-A3B (A/B A.X-3.1 · Gravity-30B-A5B)
+    desc: Produces the detail page (size chart from the spec) and copy. Routine inquiries get automatic rule-based replies, and only exceptions get a draft.
+    in: spec.json · colorways · photos of the real garment
+    out: product.json · detail page · CS drafts
+    artifact: /fitting
+
+  - id: n13
+    name: Trademark watch
+    gate: auto
+    review: launch
+    model: KIPRIS Plus API
+    desc: Collects similar trademark filings in class 25 each week and sends an alert.
+    in: trademark list
+    out: trademark_weekly.md

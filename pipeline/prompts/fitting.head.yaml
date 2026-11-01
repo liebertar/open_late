@@ -1,0 +1,76 @@
+id: fitting.head
+version: 1
+model: Z-Image-Turbo 6B (img2img on a 1024 px head crop, keeps 30% of the original)
+format: >-
+  English prose, subject first, positive phrasing only, colours as words. Describes only what the crop shows (head, hair,
+  neck); the body comes from fitting.portrait and is not touched.
+note: >-
+  A full-body render gives the face ~70 px, so faces and hair come out generic. The engine crops the head, re-draws it at
+  1024 px with this prompt and pastes it back with a feathered mask (head and hair only, never the underwear straps).
+  Hair is cast per size slot so the five people in one lineup never share a hairstyle.
+template: >-
+  Close-up studio portrait of a {age}-year-old {ethnicity} professional fashion model, {person}, {hair}. {face}, clear
+  eyes, groomed brows, bare face with minimal makeup, natural matte skin with fine visible texture, calm direct gaze.
+  Seamless grey backdrop, soft even diffused daylight, low contrast. Shot on a medium format camera, 80mm lens.
+parts:
+  # one hairstyle per size slot, in size order XS, S, M, L, XL
+  hair:
+    female:
+      east_asian:
+        - a sleek chin-length black bob with a sharp middle part
+        - long sleek straight black hair worn down and tucked behind the ears
+        - black hair slicked straight back in a wet-look editorial style
+        - a low sleek black ponytail with a sharp middle part
+        - shoulder-length softly layered black hair
+      white:
+        - a sharp blunt light-brown bob with a middle part
+        - long loose light-brown hair with soft natural waves
+        - blonde hair slicked straight back in a wet-look editorial style
+        - a messy low bun with face-framing strands
+        - shoulder-length straight dark-blonde hair tucked behind the ears
+      black:
+        - short natural coily hair
+        - a sleek slicked-back low ponytail
+        - a close-cropped natural buzz cut
+        - shoulder-length natural curls
+        - long box braids pulled back
+      arab:
+        - a sharp chin-length dark bob
+        - long soft dark waves worn down
+        - dark hair slicked straight back in a wet-look editorial style
+        - a sleek low dark bun with a middle part
+        - shoulder-length straight dark hair tucked behind the ears
+    male:
+      east_asian:
+        - a tousled textured black crop with short sides
+        - a short black two-block cut with a soft fringe
+        - black hair slicked back
+        - medium-length black hair pushed back with a middle part
+        - a clean black buzz cut
+      white:
+        - a tousled textured crop with short sides
+        - medium-length wavy brown hair pushed back
+        - brown hair slicked back
+        - a classic short side part
+        - a short buzz cut
+      black:
+        - short natural coils with faded sides
+        - a clean high-top fade
+        - short twists
+        - a sharp line-up with a short crop
+        - a close buzz cut
+      arab:
+        - a short fade with a textured dark top
+        - medium-length dark wavy hair pushed back
+        - thick dark hair slicked back
+        - a tousled textured dark crop with short sides
+        - a clean buzz cut
+  face:
+    XS: Striking editorial model face with defined cheekbones
+    S: Striking editorial model face with defined cheekbones
+    M: Striking editorial model face with softly defined cheekbones
+    L: Striking editorial model face with soft full cheeks
+    XL: Striking editorial model face with soft full cheeks and a rounded jawline
+changelog:
+  - "1: head pass for model-like faces and hair (founder: faces and hair did not look like models). Tested on three
+    portraits at keep 0.55 / 0.75 / 0.3: only 0.3 changed the hair; the mask stops above the straps"

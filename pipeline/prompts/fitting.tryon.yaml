@@ -1,0 +1,33 @@
+id: fitting.tryon
+version: 6
+model: FLUX.2 klein 4B (edit, 2 references)
+format: English prose, references named by position, fit stated as numbers and words, ~60 words, positive phrasing
+template: >-
+  {sleeve}. The person from the first image now wears the hoodie from the second image over their underwear.
+  {length}. A {fit} fit with about {ease} cm of ease at the chest, the hood resting down on the back. Their face,
+  hair, skin tone, body shape, pose, underwear bottoms, bare legs, feet and the grey backdrop stay exactly as in the
+  first image. Photorealistic catalog photo.
+parts:
+  # keyed by the fit codes the console computes from pattern vs body measurements; {cm} = sleeve excess in cm
+  fit: {tight: tight, fitted: fitted, regular: regular, relaxed: relaxed, oversized: oversized}
+  length:
+    cropped: The hem is cropped and ends above the hip bones
+    hip: The ribbed hem sits at the hip
+    below_hip: The ribbed hem falls a few centimetres below the hip line, to about the top of the thighs
+    thigh: The hoodie is long and the hem reaches mid-thigh
+  sleeve:
+    short: The sleeves are short and the cuffs stop a few centimetres above the wrist bones
+    wrist: The sleeve cuffs end exactly at the wrist bones
+    bunch: The sleeves are about {cm} cm longer than the arms, so the ribbed cuffs hold at the wrists and the extra fabric gathers in a few soft folds just above them
+    long: The sleeves are about {cm} cm too long for this person, thick rolls of bunched fabric pile up along each forearm from the elbow down to the wrist, and the ribbed cuffs slide over the base of the thumbs
+changelog:
+  - "6: sleeve sentence first, with the measured excess in cm. Same render, same seed: putting it first with a number
+    gave visibly stacked forearms where v5 (sleeve after the subject, no number) gave a plain wrist cuff"
+  - "5: 'long' now means heavy stacking on the forearm, not cuffs over the hands. Hugo has rib cuffs that grip the
+    wrist, so +8-13 cm of sleeve bunches up the arm; the old wording asked for something the garment would not do
+    (and klein would not draw it, even in a second edit pass). Label over the hand -> stacked on forearm"
+  - "4: sleeve and hem first and described as what is visible (cuffs over the backs of the hands, folds on the forearm).
+    Visual QA found every 'long' sleeve (+12 cm on women in a unisex size) rendered as a wrist-length cuff"
+  - "3: fit phrases moved here from fitting.py (all prompt wording lives in the registry)"
+  - "2: moved to registry, shortened"
+  - "1: initial (fitting.py constant)"

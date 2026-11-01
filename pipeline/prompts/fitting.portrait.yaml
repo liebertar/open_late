@@ -1,0 +1,55 @@
+id: fitting.portrait
+version: 8
+model: Z-Image-Turbo 6B (txt2img, 9 steps, q8)
+format: >-
+  English prose, subject first, ~100 words, positive phrasing only, colors as words (no hex: text-capable models
+  print them into the picture)
+note: >-
+  Height is not in the prompt on purpose: the model ignores absolute size and always fills the frame.
+  The engine cuts the person out and re-stages them at true scale from the body table (meta.height_cm).
+template: >-
+  Full-length studio catalog photograph of a {age}-year-old {ethnicity} professional fashion model, {person}
+  with {build}. Striking editorial face with defined cheekbones. Standing straight and facing the camera, feet
+  hip-width apart, arms relaxed and slightly away from the body, chin level, calm direct gaze. {hair}, bare face
+  with minimal makeup, natural matte skin with fine visible texture. {underwear} Seamless light grey paper
+  backdrop filling the frame, soft even diffused daylight, low contrast, soft shadows. Shot on a medium format camera, 80mm lens, f/8, the whole body from head
+  to feet in frame.
+parts:
+  person: {female: a woman, male: a man}
+  hair: {female: Hair pulled back in a sleek low bun, male: Short natural textured hair}
+  underwear:
+    female: "She wears a matching matte cotton bralette and briefs in {shade}."
+    male: "He wears only matte cotton boxer briefs in {shade}."
+  shade: {east_asian: light warm beige, white: light peach beige, black: deep cocoa brown, arab: warm caramel tan}
+  ethnicity: {east_asian: East Asian, white: white European, black: Black, arab: Middle Eastern Arab}
+  build:
+    female:
+      XS: a petite, very slender frame, slim arms, narrow shoulders and long legs, US dress size 0
+      S: a slim but healthy figure, a small bust, gently curved hips and softly rounded thighs, US dress size 4
+      M: a medium, softly curvy figure, a soft tummy and fuller thighs, US dress size 10
+      L: a curve model figure, a soft belly, full arms and wide hips, US dress size 14
+      XL: a plus-size curve model figure, a round belly, full arms and full thighs, US dress size 18
+    male:
+      XS: a skinny, slight build, a narrow bony chest with visible collarbones, very thin arms and legs and a soft flat stomach, US men's size XS
+      S: a slim, narrow-shouldered build like an ordinary young man, slim soft arms and a smooth stomach with a little natural softness at the waistband, US men's size S
+      M: a dad-bod average build, a soft rounded belly that slightly overhangs the waistband, mild love handles, a soft chest and soft arms, US men's size M
+      L: a stocky big-and-tall build, a soft chest and a rounded belly
+      XL: a heavyset big-and-tall build, a large round belly and a soft chest
+changelog:
+  - "8: men's S still showed six-packs in 3 of 4 groups (QA round 3). Same fix that worked for M: a visible soft cue
+    (softness at the waistband) plus 'ordinary young man'. Re-rolls now go through best-of-3 candidates
+    (host/fitting/candidates.py) picked by a reviewer, because some cells fail on the model's prior, not the words"
+  - "7: men's XS/S/M still came out with six-packs in QA round 2 ('professional fashion model' in the template wins over
+    abstract words like 'untoned'). Replaced them with visible body cues: bony chest and collarbones for XS, a belly
+    over the waistband and love handles for M. Template unchanged so women's and men's L/XL portraits stay current"
+  - "6: visual QA (40 portraits, 2 skeptics per flag) found women's S identical to XS ('runway' read as runway-thin) and
+    every men's M a lean six-pack body ('average build' lost to 'fashion model'); XS men had abs too. Rewrote those three
+    builds with concrete soft-body wording and US size labels. Other sizes unchanged, so their portraits stay current"
+  - "5 (model): portraits moved from FLUX.2 klein 4B to Z-Image-Turbo after a same-prompt bake-off against klein and
+    Boogu (data/fitting/bakeoff/run1): klein kept glossy athletic bodies at every size, Boogu cropped the feet"
+  - "5: matte skin and even diffused daylight instead of 'glowing skin' + high-key (read as oily sheen); cotton
+    underwear instead of seamless (lycra shine); thin-arm wording for XS; neutral front stance for try-on; no hex"
+  - "4: professional-model look (stance, grooming, editorial light) at every size; height left to true-scale staging"
+  - "3: positive phrasing only and ~75 words (FLUX.2 ignores negatives; >100 words muddles)"
+  - "2: concrete clothing sizes per body, explicit underwear shade per skin tone (bodies drifted thin/muscular)"
+  - "1: initial catalog recipe"

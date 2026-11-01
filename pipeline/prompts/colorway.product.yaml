@@ -1,0 +1,13 @@
+id: colorway.product
+version: 2
+model: FLUX.2 klein 4B (txt2img)
+format: English prose, subject first, hex with the word color next to the object, positive phrasing
+template: >-
+  Studio e-commerce product photo of a heavyweight loopback French terry pullover hoodie on an invisible ghost
+  mannequin, front view. Matte brushed cotton outer fabric, {outer} color {outer_hex}. The hood lining is
+  contrasting {lining} color {lining_hex}, clearly visible at the hood opening. Kangaroo pocket, ribbed cuffs and
+  hem band in the outer color. Tiny flower-shaped bar tack stitches at the pocket corners in {lining} thread.
+  Plain unbranded garment. Light warm grey seamless background, soft even studio light, sharp focus.
+changelog:
+  - "2: moved to registry; 'no logo, no text, no print' -> 'plain unbranded garment' (no negatives in FLUX.2)"
+  - "1: inline in experiments/02-colorway-board/render.sh"

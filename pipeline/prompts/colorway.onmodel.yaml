@@ -1,0 +1,11 @@
+id: colorway.onmodel
+version: 2
+model: FLUX.2 klein 4B (edit, 2 references)
+format: English prose, references named by position
+template: >-
+  The person from the first image wearing the hoodie from the second image with the hood resting down on the back,
+  keeping the hoodie colors exactly: {outer} body and {lining} hood lining. The same face, body proportions, pose,
+  shorts and background as the first image. Photorealistic.
+changelog:
+  - "2: moved to registry"
+  - "1: inline in experiments/02-colorway-board/render.sh"
