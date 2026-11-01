@@ -1,0 +1,57 @@
+/* OPEN LATE design tokens: one theme, one type scale, one set of loaders, on every page.
+ *
+ * Loaders follow the wait, never the page:
+ *   under 1 s    nothing
+ *   1 to 10 s    .ol-bar under the top bar (OL.wait in shell.js)
+ *   over 10 s    .progress in place, with time left and a cancel
+ *   first load   .skel boxes at the final layout positions, so nothing shifts
+ */
+:root{
+  --bg:#f5f5f4; --panel:#fff; --raised:#fafaf9; --hover:#efefed; --line:#e4e4e2; --line2:#d4d4d1;
+  --t1:#18181b; --t2:#52525b; --t3:#6b6b73; --t4:#a1a1aa;      /* text: primary / secondary / tertiary / disabled */
+  --accent:#c95f36; --accent-dim:rgba(201,95,54,.12);
+  --ok:#1a7f37; --warn:#9a6700; --bad:#cf222e; --grey:#8b8b95;
+  --chip:#f1f1ef; --studio:#efefef;                            /* the catalog backdrop all photos share */
+  --shadow:0 12px 32px rgba(0,0,0,.12);
+  --shell:46px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-bottom:104px}
+body{margin:0;background:var(--bg);color:var(--t1);font:15px/1.5 -apple-system,"SF Pro Text",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* one button system: black is the single primary action on a screen */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;border:1px solid var(--line2);background:var(--panel);border-radius:9px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.btn:hover:not([disabled]){border-color:var(--t3)}
+.btn.primary{background:var(--t1);border-color:var(--t1);color:#fff;font-weight:600}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.link{background:none;border:0;padding:0;color:var(--t2);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.link:hover{color:var(--t1)}
+
+/* the top bar keeps its height before shell.js fills it */
+#ol-shell{min-height:var(--shell)}
+
+.ol-bar{position:fixed;top:var(--shell);left:0;right:0;height:2px;z-index:29;overflow:hidden;opacity:0;pointer-events:none}
+.ol-bar.on{opacity:1}
+.ol-bar i{position:absolute;inset:0 auto 0 0;width:32%;background:var(--t1);animation:ol-slide 1.1s ease-in-out infinite}
+@keyframes ol-slide{from{transform:translateX(-100%)}to{transform:translateX(320%)}}
+
+.skel{background:var(--hover);border-radius:10px;animation:ol-pulse 1.4s ease-in-out infinite}
+@keyframes ol-pulse{50%{opacity:.55}}
+
+.progress{height:4px;background:rgba(127,127,127,.3);border-radius:99px;overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:currentColor;border-radius:99px;transition:width .3s linear}
+
+/* moving between pages: the bar stays put, the content cross-fades */
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.14s}
+.ol-shell{view-transition-name:ol-shell}
+
+@media (prefers-reduced-motion:reduce){
+  .ol-bar i,.skel{animation:none}
+  .progress i{transition:none}
+  ::view-transition-old(root),::view-transition-new(root){animation:none}
+}

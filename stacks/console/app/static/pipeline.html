@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OPEN LATE · Pipeline</title>
+<link rel="stylesheet" href="/static/tokens.css">
+<style>
+:root{--green:var(--ok);--amber:var(--warn);--red:var(--bad);--mat:#17181b}
+html,body{height:100%}
+body{overflow:hidden}
+@media(max-width:1180px){body{overflow:auto}}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+a{color:var(--t1)}a:hover{text-decoration:underline}
+kbd{font:12px ui-monospace,Menlo,monospace;border:1px solid var(--line2);border-bottom-width:2px;border-radius:4px;padding:0 4px;color:var(--t3)}
+.glyph{display:inline-flex;justify-content:center;width:12px;flex:none;font-size:13.5px;line-height:1;font-weight:700}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;color:var(--t2);background:var(--chip);border:1px solid var(--line);border-radius:5px;padding:0 6px;line-height:18px;white-space:nowrap}
+.chip.contact{color:var(--accent);border-color:var(--accent-dim)}
+.count{font-size:12.5px;color:var(--t2);background:var(--chip);border-radius:99px;padding:0 7px;line-height:17px}
+.h{display:flex;align-items:center;gap:6px;margin:0;font-size:12.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);font-weight:600}
+
+.app{display:grid;grid-template-columns:264px minmax(0,1fr) 440px;height:calc(100vh - 46px - 26px)}
+@media(max-width:1180px){.app{grid-template-columns:264px minmax(0,1fr);height:auto}.detail{grid-column:1/-1;border-left:0;border-top:1px solid var(--line)}}
+@media(max-width:760px){.app{grid-template-columns:1fr}}
+
+/* sidebar: decisions first, then running work */
+.side{background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding:10px 6px}
+.sec{padding:4px 0 10px}
+.sec .h{margin:4px 8px 6px}
+.item{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:none;border:0;border-radius:7px;padding:6px 8px;cursor:pointer}
+.item:hover{background:var(--hover)}
+.item[aria-current=true]{background:var(--raised)}
+.item .l1{display:flex;align-items:center;gap:7px;min-width:0}
+.item .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .l2{color:var(--t3);font-size:13px;padding-left:19px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.none{color:var(--t4);font-size:13.5px;padding:2px 8px}
+.mini{height:3px;background:var(--line);border-radius:99px;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--t1);transition:width .4s}
+.running .glyph{animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.3}}
+
+/* center */
+.center{display:flex;flex-direction:column;min-width:0;min-height:0}
+.tabs{min-height:44px;display:flex;align-items:stretch;border-bottom:1px solid var(--line);background:var(--panel);padding:0 8px;overflow-x:auto}
+.tab{display:flex;align-items:center;gap:7px;background:none;border:0;border-bottom:1.5px solid transparent;color:var(--t3);padding:9px 12px;cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--t1)}
+.tab[aria-selected=true]{color:var(--t1);border-bottom-color:var(--t1)}
+.tab .flag{width:6px;height:6px;border-radius:50%;background:var(--amber)}
+.stage{padding:16px 18px 24px;overflow:auto;min-height:0}
+.stage-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:12px}
+.stage-head h1{margin:0;font-size:20px;font-weight:650}
+.stage-head p{margin:0;color:var(--t3);flex-basis:100%}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.card{position:relative;display:flex;flex-direction:column;gap:7px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 11px 11px;cursor:pointer;min-width:0}
+.card:hover{border-color:var(--line2);background:var(--raised)}
+.card[aria-pressed=true]{border-color:var(--t1);box-shadow:0 0 0 1px var(--t1)}
+.card .r1{display:flex;align-items:center;gap:7px;min-width:0}
+.card .seq{font:600 12.5px ui-monospace,Menlo,monospace;color:var(--t4)}
+.card .nm{font-weight:650;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .r1 .chip:last-child{margin-left:auto}
+.card .model{color:var(--t2);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:-3px}
+.pv{position:relative;height:120px;border-radius:7px;background:var(--bg);border:1px solid var(--line);overflow:hidden;display:grid;gap:1px}
+.pv.n1{grid-template-columns:1fr}.pv.n2{grid-template-columns:1fr 1fr}.pv.n3{grid-template-columns:1fr 1fr 1fr}
+.pv img{width:100%;height:100%;object-fit:cover;display:block}
+.pv img.svg{object-fit:contain;padding:6px;background:var(--mat)}
+.pv .more{position:absolute;right:6px;bottom:6px;font-size:12.5px;background:rgba(0,0,0,.6);color:#fff;border-radius:5px;padding:0 6px}
+.pv.empty{display:flex;align-items:center;justify-content:center;height:56px;border-style:dashed}
+.pv.empty .outs{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.pv.text{display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:14px;padding:10px;text-align:center;height:56px}
+.card .ft{display:flex;align-items:center;gap:7px;color:var(--t2);font-size:13.5px}
+.card .ft .st{font-weight:650}
+.card .ft .timing{margin-left:auto;color:var(--t1);font-size:13px;white-space:nowrap}
+
+/* detail: decision first, evidence next, the rest folded */
+.detail{background:var(--panel);border-left:1px solid var(--line);overflow:auto;min-height:0}
+.dtop{position:sticky;top:0;z-index:2;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 16px 12px}
+.dtop .r1{display:flex;align-items:center;gap:8px;color:var(--t3);font-size:13.5px}
+.dtop .r1 .nav{margin-left:auto;display:flex;gap:4px}
+.dtop h2{margin:3px 0 2px;font-size:20px;font-weight:650}
+.dtop .desc{margin:0;color:var(--t2);font-size:14px}
+.decide{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.decide .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn.ok:not([disabled]){background:var(--green);border-color:var(--green);color:#fff;font-weight:650}
+.btn.bad:not([disabled]){border-color:var(--red);color:var(--red)}
+.btn kbd{border-color:currentColor;color:inherit;opacity:.65}
+.codes{display:flex;gap:4px;flex-wrap:wrap}
+.codes button{border:1px solid var(--line2);background:none;border-radius:99px;padding:2px 10px;color:var(--t2);cursor:pointer;font-size:13.5px}
+.codes button[aria-pressed=true]{border-color:var(--red);color:var(--red);background:rgba(248,81,73,.08)}
+.decide input,.decide select{background:var(--bg);border:1px solid var(--line2);border-radius:7px;padding:5px 9px;flex:1;min-width:120px}
+.locked{color:var(--t3);font-size:13.5px}
+.blk{padding:12px 16px;border-bottom:1px solid var(--line)}
+.verdict{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+.verdict .big{font-size:20px;line-height:1.3;font-weight:700;color:var(--t1)}
+.verdict .sub{color:var(--t2);white-space:nowrap}
+.fails{margin:8px 0 0;padding-left:16px;color:var(--red);font-size:13.5px}
+.fails li{margin:2px 0}
+.linkbtn{background:none;border:0;color:var(--t2);text-decoration:underline;cursor:pointer;padding:0;font-size:13.5px}
+.gal{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.gal button{position:relative;padding:0;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--bg);cursor:zoom-in;aspect-ratio:3/4}
+.gal img{width:100%;height:100%;object-fit:cover;display:block}
+.gal img.svg{object-fit:contain;padding:6px;background:var(--mat)}
+.gal .more{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);color:#fff;font-weight:650;font-size:16px}
+details.fold{border-bottom:1px solid var(--line)}
+details.fold summary{list-style:none;cursor:pointer;padding:10px 16px;display:flex;align-items:center;gap:8px;color:var(--t2);font-size:14px}
+details.fold summary::-webkit-details-marker{display:none}
+details.fold summary::before{content:"▸";color:var(--t4);font-size:10px;transition:transform .15s}
+details.fold[open] summary::before{transform:rotate(90deg)}
+details.fold .in{padding:0 16px 12px}
+.kv{display:grid;grid-template-columns:72px minmax(0,1fr);gap:5px 10px;margin:0}
+.kv dt{color:var(--t3)}.kv dd{margin:0;word-break:break-word}
+.files{list-style:none;margin:0;padding:0}
+.files li{display:flex;gap:8px;padding:3px 0}.files li span{margin-left:auto;color:var(--t4)}
+.hist{list-style:none;margin:0;padding:0}
+.hist li{display:flex;gap:8px;padding:5px 0;border-top:1px solid var(--line);color:var(--t2);font-size:13.5px}
+.hist li:first-child{border-top:0}
+.hist b{color:var(--t1);font-weight:600}.hist .ts{margin-left:auto;color:var(--t4);white-space:nowrap}
+
+.statusbar{height:26px;display:flex;align-items:center;gap:16px;padding:0 12px;border-top:1px solid var(--line);background:var(--panel);color:var(--t2);font-size:13px;overflow:hidden;white-space:nowrap}
+.statusbar .s{display:flex;align-items:center;gap:6px}
+.statusbar .sp{flex:1}
+.toasts{position:fixed;top:56px;right:14px;display:flex;flex-direction:column;gap:8px;z-index:20;width:330px;max-width:calc(100vw - 28px)}
+.toast{display:flex;gap:10px;background:var(--raised);border:1px solid var(--line2);border-left:3px solid var(--c);border-radius:9px;padding:10px 12px;box-shadow:var(--shadow);animation:in .18s ease-out}
+.toast .tt{font-weight:650}.toast .tm{color:var(--t3);font-size:13.5px}
+.toast .x{margin-left:auto;background:none;border:0;color:var(--t4);cursor:pointer;align-self:flex-start}
+@keyframes in{from{opacity:0;transform:translateX(12px)}}
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.86);display:none;align-items:center;justify-content:center;z-index:45;padding:40px 70px}
+.lb.on{display:flex}.lb img{max-width:100%;max-height:100%;border-radius:8px;background:var(--mat)}
+.lb .arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:0;color:#fff;font-size:22px;width:44px;height:44px;border-radius:50%;cursor:pointer}
+.lb .prev{left:14px}.lb .next{right:14px}
+.lb .cnt{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);color:#ccc;font-size:13.5px}
+@media (prefers-reduced-motion:reduce){.running .glyph{animation:none}.mini i{transition:none}}
+</style>
+</head>
+<body>
+<header id="ol-shell" data-page="pipeline" data-ops></header>
+<script src="/static/shell.js"></script>
+<div class="app">
+  <aside class="side" aria-label="To do">
+    <div class="sec"><h3 class="h">Needs review <span class="count" id="reviewCount">0</span></h3><div id="reviews"></div></div>
+    <div class="sec"><h3 class="h">Jobs <span class="count" id="jobCount">0</span></h3><div id="jobs"></div></div>
+  </aside>
+  <main class="center">
+    <div class="tabs" role="tablist" id="tabs" aria-label="Stages"></div>
+    <section class="stage" id="stage" role="tabpanel"><div class="cards"><div class="skel" style="height:216px"></div><div class="skel" style="height:216px"></div><div class="skel" style="height:216px"></div><div class="skel" style="height:216px"></div><div class="skel" style="height:216px"></div><div class="skel" style="height:216px"></div></div></section>
+  </main>
+  <aside class="detail" id="detail" aria-live="polite"></aside>
+</div>
+<footer class="statusbar" id="statusbar"></footer>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="lb" id="lb" role="dialog" aria-label="Enlarged output">
+  <button class="arrow prev" type="button" aria-label="Previous">‹</button><img alt=""><button class="arrow next" type="button" aria-label="Next">›</button><span class="cnt"></span>
+</div>
+
+<script>
+const STATUS = {waiting:["Waiting","--grey","○"], running:["Running","--accent","◐"], passed:["Checks passed","--green","✓"],
+                failed:["Checks failed","--red","✕"], needs_review:["Needs my review","--amber","◆"], approved:["Approved","--green","●"],
+                rejected:["Rejected","--red","⊘"]};
+const GATE = {approve:"Approve", auto:"Auto", contact:"Vendor contact"};
+const GATE_HELP = {approve:"After automatic checks pass, I must approve before it moves on", auto:"Moves on by itself when checks pass, stops when they fail", contact:"A person contacts the sample room or factory"};
+const STAGES = [
+  {key:"design", title:"Design", desc:"Decide what to make and fix the spec, fabric, sizes, and pattern in code."},
+  {key:"sample", title:"Sample", desc:"Check a physical sample and correct the pattern from its measurements."},
+  {key:"launch", title:"Launch", desc:"Set colours, go through production and inspection, and publish the product page."}];
+
+let data = {nodes:[], state:{}, timing:{}}, jobs = [], codes = {}, loaded = false, prevJobs = {}, prevStatus = {};
+let [stageKey, selected] = (location.hash.slice(1) || "design/n04").split("/");
+const ui = {code: null, showAllFails: false};
+
+const $ = id => document.getElementById(id);
+const el = (tag, attrs = {}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") e.className = v; else if (k === "style") e.style.cssText = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids.flat()) if (k !== null && k !== undefined && k !== false) e.append(k instanceof Node ? k : String(k));
+  return e;
+};
+const put = (node, ...kids) => node.replaceChildren(...kids.flat().filter(k => k !== null && k !== undefined && k !== false));
+const api = async (path, opts = {}) => {
+  const r = await fetch(path, {headers:{"content-type":"application/json"}, ...opts});
+  const b = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(b.detail || r.statusText);
+  return b;
+};
+const glyph = s => el("span", {class:"glyph", style:`color:var(${STATUS[s][1]})`, "aria-hidden":"true"}, STATUS[s][2]);
+const running = id => jobs.find(j => j.node === id && j.status === "running");
+const statusOf = n => running(n.id) ? "running" : (data.state[n.id] || {}).status || "waiting";
+const pct = j => j && j.total ? Math.round(100 * j.done / j.total) : 0;
+const short = t => (t || "").replace("T", " ").slice(5, 16);
+const isSvg = u => /\.svg($|\?)/.test(u);
+const timingOf = n => { const st = data.state[n.id] || {};
+  if (st.timing && st.timing.length) return st.timing;
+  const t = (data.timing || {})[n.id]; return t ? [{label: "Run", avg: t.avg}] : []; };
+const timingText = n => timingOf(n).map(x => `${x.label} ${x.avg} s`).join(" · ");
+const pendingReviews = () => data.nodes.filter(n => n.gate === "approve" && ["needs_review", "passed"].includes((data.state[n.id] || {}).status));
+
+function toast(title, msg, status = "passed", link) {
+  const t = el("div", {class:"toast", style:`--c:var(${STATUS[status][1]})`, role:"status"},
+    el("div", {}, el("div", {class:"tt"}, title), el("div", {class:"tm"}, msg || "", link ? " · " : "", link ? el("a", {href:link}, "View result") : null)),
+    el("button", {class:"x", type:"button", "aria-label":"Close", onclick: () => t.remove()}, "✕"));
+  $("toasts").prepend(t); setTimeout(() => t.remove(), 7000);
+}
+window.addEventListener("error", e => toast("Page error", `${e.message} (${(e.filename || "").split("/").pop()}:${e.lineno})`, "failed"));
+
+function notifyChanges() {
+  if (!loaded) return;
+  for (const j of jobs) if (prevJobs[j.id] === "running" && j.status !== "running") {
+    const bad = j.status === "failed" || j.outcome === "failed";
+    toast(j.status === "failed" ? "Job failed" : bad ? "Job finished · checks failed" : "Job finished", `${j.name} · ${j.message || ""}`, bad ? "failed" : "passed", j.link);
+  }
+  for (const n of data.nodes) { const s = (data.state[n.id] || {}).status, b = prevStatus[n.id];
+    if (s && b !== undefined && s !== b && s === "needs_review") toast("Needs your review", `${n.id} ${n.name}`, "needs_review"); }
+}
+
+function go(nodeId) {
+  const n = data.nodes.find(x => x.id === nodeId); if (!n) return;
+  stageKey = n.review; selected = n.id; ui.code = null; ui.showAllFails = false;
+  history.replaceState(null, "", `#${stageKey}/${selected}`);
+  render();
+}
+
+/* ---------- sidebar ---------- */
+function renderSide() {
+  const pend = pendingReviews();
+  $("reviewCount").textContent = pend.length;
+  put($("reviews"), pend.length ? pend.map(n => { const st = data.state[n.id] || {};
+    return el("button", {type:"button", class:"item", "aria-current":String(n.id === selected), onclick: () => go(n.id)},
+      el("span", {class:"l1"}, glyph(st.status), el("span", {class:"t"}, n.name)),
+      el("span", {class:"l2 mono"}, `${n.id} · ${st.summary || ""}`)); })
+    : el("div", {class:"none"}, "Nothing is waiting for approval"));
+  const active = jobs.filter(j => j.status === "running");
+  $("jobCount").textContent = active.length;
+  const shown = [...active, ...jobs.filter(j => j.status !== "running").slice(0, Math.max(0, 5 - active.length))];
+  put($("jobs"), shown.length ? shown.map(j => {
+    const s = j.status === "running" ? "running" : j.status === "failed" || j.outcome === "failed" ? "failed" : "passed";
+    return el("button", {type:"button", class:`item ${s === "running" ? "running" : ""}`, onclick: () => j.node ? go(j.node) : (j.link && (location.href = j.link))},
+      el("span", {class:"l1"}, glyph(s), el("span", {class:"t"}, j.name)),
+      el("span", {class:"l2"}, j.status === "running" ? `${j.done}/${j.total} · ${j.message}` : `${j.message || ""} · ${short(j.updated)}`),
+      j.status === "running" ? el("div", {class:"mini", style:"margin:3px 0 0 19px"}, el("i", {style:`width:${pct(j)}%`})) : null);
+  }) : el("div", {class:"none"}, "No jobs have run"));
+}
+
+/* ---------- tabs + cards ---------- */
+function renderTabs() {
+  put($("tabs"), STAGES.map((st, i) => {
+    const ns = data.nodes.filter(n => n.review === st.key);
+    const needs = ns.some(n => (data.state[n.id] || {}).status === "needs_review");
+    return el("button", {type:"button", role:"tab", class:"tab", "aria-selected":String(st.key === stageKey), title:`${i + 1}`,
+      onclick: () => go(ns.some(n => n.id === selected) ? selected : (ns[0] || {}).id)},
+      st.title, el("span", {class:"count"}, ns.length), needs ? el("span", {class:"flag", title:"Needs review"}) : null, el("kbd", {}, i + 1));
+  }));
+}
+function preview(n, st) {
+  const pv = st.previews || [];
+  if (pv.length) { const take = pv.slice(0, 3);
+    return el("div", {class:`pv n${take.length}`}, take.map(u => el("img", {src:u, alt:"", loading:"lazy", class: isSvg(u) ? "svg" : null})),
+      pv.length > 3 ? el("span", {class:"more"}, `+${pv.length - 3}`) : null); }
+  if (st.summary) return el("div", {class:"pv text"}, st.summary);
+  const outs = (n.out || "").split(/[·→]/).map(x => x.trim()).filter(Boolean);
+  const tag = o => (o.match(/\.([a-z0-9]+)$/i) || [null, o.slice(0, 4)])[1].toUpperCase();
+  return el("div", {class:"pv empty", title:`Planned outputs: ${outs.join(", ")}`}, el("div", {class:"outs"}, outs.slice(0, 5).map(o => el("span", {class:"chip mono"}, tag(o)))));
+}
+function renderStage() {
+  const st = STAGES.find(s => s.key === stageKey) || STAGES[0];
+  const ns = data.nodes.filter(n => n.review === st.key);
+  const counts = {}; ns.forEach(n => { const s = statusOf(n); counts[s] = (counts[s] || 0) + 1; });
+  put($("stage"),
+    el("div", {class:"stage-head"}, el("h1", {}, `${st.title} review`),
+      Object.entries(counts).map(([s, c]) => el("span", {class:"chip"}, glyph(s), `${STATUS[s][0]} ${c}`)), el("p", {}, st.desc)),
+    el("div", {class:"cards"}, ns.map((n, i) => {
+      const s = statusOf(n), stt = data.state[n.id] || {}, j = running(n.id), t = timingText(n);
+      return el("button", {type:"button", class:`card ${s}`, "aria-pressed":String(n.id === selected), onclick: () => go(n.id)},
+        el("div", {class:"r1"}, glyph(s), el("span", {class:"seq"}, String(i + 1).padStart(2, "0")), el("span", {class:"nm"}, n.name),
+          n.added ? el("span", {class:"chip"}, "Added") : null, el("span", {class:`chip ${n.gate}`}, GATE[n.gate])),
+        el("div", {class:"model"}, n.model), preview(n, stt),
+        j ? el("div", {class:"mini"}, el("i", {style:`width:${pct(j)}%`})) : null,
+        el("div", {class:"ft"}, el("span", {class:"st", style:`color:var(${STATUS[s][1]})`}, STATUS[s][0]), j ? ` · ${j.message}` : "",
+          t ? el("span", {class:"timing num", title:"Average time"}, `⏱ ${t}`) : null));
+    })));
+}
+
+/* ---------- detail: decision, evidence, then folded details ---------- */
+async function approve(n) {
+  try {
+    await api(`/api/nodes/${n.id}/approve`, {method:"POST"});
+    toast("Approved", `${n.id} ${n.name}`, "approved");
+    await refresh(); const next = pendingReviews()[0]; if (next) go(next.id);   // straight on to the next decision
+  } catch (e) { toast("Could not approve", e.message, "failed"); }
+}
+async function reject(n, note) {
+  if (!ui.code) { toast("Choose a reason", Object.values(codes).join(" · "), "needs_review"); return; }
+  try {
+    await api(`/api/nodes/${n.id}/reject`, {method:"POST", body:JSON.stringify({code: ui.code, reason: note})});
+    toast("Rejected", `${codes[ui.code]}${note ? " · " + note : ""}`, "rejected");
+    ui.code = null; await refresh(); const next = pendingReviews()[0]; if (next) go(next.id);
+  } catch (e) { toast("Could not reject", e.message, "failed"); }
+}
+function decisionBar(n, st, j) {
+  const box = el("div", {class:"decide"});
+  if (n.runnable) {
+    const sel = el("select", {"aria-label":"Design"}, el("option", {value:"hugo"}, "Hugo hoodie"), el("option", {value:"sven"}, "Sven sweatshirt"));
+    box.append(el("div", {class:"row"}, sel, el("button", {type:"button", class:"btn primary", disabled: !!j, onclick: async () => {
+      try { await api(`/api/nodes/${n.id}/run`, {method:"POST", body:JSON.stringify({design: sel.value})}); toast("Run started", `${n.id} ${n.name}`, "running"); refresh(); }
+      catch (e) { toast("Could not run", e.message, "failed"); } }}, j ? "◐ Running" : "▶ Run")));
+  }
+  if (n.gate === "approve") {
+    const open = ["passed", "needs_review"].includes(st.status);
+    if (!open) box.append(el("div", {class:"locked"}, st.status === "approved" ? "● Approved" : st.status === "rejected" ? `⊘ Rejected · ${st.reason || ""}` : "Automatic checks must pass before approval"));
+    else {
+      const note = el("input", {placeholder:"Note (optional)", "aria-label":"Rejection note"});
+      box.append(...[
+        el("div", {class:"row"},
+          el("button", {type:"button", class:"btn ok", onclick: () => approve(n)}, "✓ Approve ", el("kbd", {}, "A")),
+          el("button", {type:"button", class:"btn bad", onclick: () => reject(n, note.value.trim())}, "⊘ Reject")),
+        el("div", {class:"codes", role:"group", "aria-label":"Rejection reason"}, Object.entries(codes).map(([k, l]) =>
+          el("button", {type:"button", "aria-pressed":String(ui.code === k), onclick: () => { ui.code = ui.code === k ? null : k; renderDetail(); }}, l))),
+        ui.code ? el("div", {class:"row"}, note) : null].filter(Boolean));  // append() would print a null
+    }
+  }
+  return box.children.length ? box : null;
+}
+async function renderDetail() {
+  const n = data.nodes.find(x => x.id === selected), box = $("detail");
+  if (!n) { put(box, el("div", {class:"blk none"}, "Choose a node")); return; }
+  const st = data.state[n.id] || {}, s = statusOf(n), j = running(n.id);
+  const [files, hist] = await Promise.all([
+    st.run ? api(`/api/runs/${st.run}`).then(r => r.files).catch(() => []) : [],
+    api(`/api/history?node=${n.id}&limit=10`).then(r => r.history).catch(() => [])]);
+  if (n.id !== selected) return;
+  const ns = data.nodes.filter(x => x.review === n.review), i = ns.indexOf(n);
+  const fails = st.fails || [], pv = st.previews || [];
+  const links = [n.artifact ? el("a", {href:n.artifact}, "Result page ↗") : null, st.run ? el("a", {href:`/runs/${st.run}`}, "Output folder ↗") : null].filter(Boolean);
+  put(box,
+    el("div", {class:"dtop"},
+      el("div", {class:"r1"}, glyph(s), STATUS[s][0], el("span", {class:"mono"}, `· ${n.id}`), n.added ? el("span", {class:"chip"}, "Added") : null,
+        el("span", {class:"nav"},
+          el("button", {type:"button", class:"btn", style:"padding:2px 8px", title:"Previous (K)", disabled: i <= 0, onclick: () => go(ns[i - 1].id)}, "‹"),
+          el("button", {type:"button", class:"btn", style:"padding:2px 8px", title:"Next (J)", disabled: i >= ns.length - 1, onclick: () => go(ns[i + 1].id)}, "›"))),
+      el("h2", {}, n.name), el("p", {class:"desc"}, n.desc || ""),
+      decisionBar(n, st, j)),
+    j ? el("div", {class:"blk"}, el("div", {class:"mini"}, el("i", {style:`width:${pct(j)}%`})), el("div", {class:"none", style:"padding:6px 0 0"}, `${j.done}/${j.total} · ${j.message}`)) : null,
+    (st.summary || fails.length) ? el("div", {class:"blk"},
+      el("div", {class:"verdict"}, el("span", {class:"big num"}, st.summary || ""), timingText(n) ? el("span", {class:"sub num"}, `⏱ ${timingText(n)}`) : null),
+      fails.length ? el("ul", {class:"fails"}, fails.slice(0, ui.showAllFails ? 50 : 3).map(f => el("li", {}, f))) : null,
+      fails.length > 3 ? el("button", {type:"button", class:"linkbtn", onclick: () => { ui.showAllFails = !ui.showAllFails; renderDetail(); }},
+        ui.showAllFails ? "Collapse" : `Show ${fails.length - 3} more failures`) : null) : null,
+    pv.length ? el("div", {class:"blk"}, el("h4", {class:"h"}, "Outputs ", el("span", {class:"count"}, pv.length), links.length ? el("span", {style:"margin-left:auto;text-transform:none;letter-spacing:0;display:flex;gap:10px"}, links) : null),
+      el("div", {class:"gal"}, pv.slice(0, 4).map((u, k) => el("button", {type:"button", onclick: () => openLb(pv, k)},
+        el("img", {src:u, alt:"", loading:"lazy", class: isSvg(u) ? "svg" : null}),
+        k === 3 && pv.length > 4 ? el("span", {class:"more"}, `+${pv.length - 4}`) : null)))) : links.length ? el("div", {class:"blk"}, links) : null,
+    files.length ? el("details", {class:"fold"}, el("summary", {}, "Files ", el("span", {class:"count"}, files.length)),
+      el("div", {class:"in"}, el("ul", {class:"files mono"}, files.map(f => el("li", {}, el("a", {href:f.url}, f.name), el("span", {}, `${f.kb} KB`)))))) : null,
+    el("details", {class:"fold"}, el("summary", {}, "Node details"),
+      el("div", {class:"in"}, el("dl", {class:"kv"},
+        el("dt", {}, "Gate"), el("dd", {}, `${GATE[n.gate]} — ${GATE_HELP[n.gate]}`),
+        el("dt", {}, "Input"), el("dd", {class:"mono"}, n.in || "—"), el("dt", {}, "Output"), el("dd", {class:"mono"}, n.out || "—"),
+        el("dt", {}, "Model"), el("dd", {}, n.model), el("dt", {}, "Average"), el("dd", {class:"num"}, timingText(n) || "—"),
+        el("dt", {}, "Updated"), el("dd", {class:"mono"}, short(st.updated) || "—")))),
+    el("details", {class:"fold"}, el("summary", {}, "History ", el("span", {class:"count"}, hist.length)),
+      el("div", {class:"in"}, hist.length ? el("ul", {class:"hist"}, hist.map(h => el("li", {}, el("b", {}, h.action), h.actor || "",
+        h.code ? ` · ${codes[h.code] || h.code}` : "", h.reason ? ` · ${h.reason}` : "", h.passed === false ? " · checks failed" : h.passed ? " · passed" : "",
+        h.error ? ` · ${h.error}` : "", el("span", {class:"ts mono"}, short(h.ts))))) : el("div", {class:"none"}, "No history yet"))));
+}
+
+function renderStatus() {
+  const c = {}; data.nodes.forEach(n => { const s = statusOf(n); c[s] = (c[s] || 0) + 1; });
+  put($("statusbar"), Object.entries(c).map(([s, v]) => el("span", {class:"s"}, glyph(s), `${STATUS[s][0]} ${v}`)), el("span", {class:"sp"}),
+    el("span", {class:"s"}, el("kbd", {}, "J"), el("kbd", {}, "K"), "node ", el("kbd", {}, "1"), "–", el("kbd", {}, "3"), "stage ", el("kbd", {}, "A"), "approve"),
+    el("span", {class:"s mono"}, `${data.nodes.length} nodes · ${new Date().toTimeString().slice(0, 8)}`));
+}
+function render() {
+  renderSide(); renderTabs(); renderStage(); renderStatus();
+  const typing = document.activeElement && $("detail").contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName);
+  if (!typing) renderDetail();
+}
+
+/* ---------- lightbox with arrows ---------- */
+let lbList = [], lbAt = 0;
+function openLb(list, at) { lbList = list; lbAt = at; showLb(); $("lb").classList.add("on"); }
+function showLb() { const lb = $("lb"); lb.querySelector("img").src = lbList[lbAt]; lb.querySelector(".cnt").textContent = `${lbAt + 1} / ${lbList.length}`; }
+$("lb").addEventListener("click", e => { if (e.target === e.currentTarget || e.target.tagName === "IMG") $("lb").classList.remove("on"); });
+$("lb").querySelector(".prev").addEventListener("click", () => { lbAt = (lbAt - 1 + lbList.length) % lbList.length; showLb(); });
+$("lb").querySelector(".next").addEventListener("click", () => { lbAt = (lbAt + 1) % lbList.length; showLb(); });
+
+document.addEventListener("keydown", e => {
+  if (e.metaKey || e.ctrlKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  const lbOn = $("lb").classList.contains("on");
+  if (lbOn) { if (e.key === "Escape") $("lb").classList.remove("on");
+    if (e.key === "ArrowLeft") $("lb").querySelector(".prev").click(); if (e.key === "ArrowRight") $("lb").querySelector(".next").click(); return; }
+  const n = data.nodes.find(x => x.id === selected);
+  if (/^[1-3]$/.test(e.key)) { const st = STAGES[+e.key - 1]; const ns = data.nodes.filter(x => x.review === st.key); go(ns.some(x => x.id === selected) ? selected : ns[0].id); }
+  else if ((e.key === "j" || e.key === "k") && n) { const ns = data.nodes.filter(x => x.review === n.review), i = ns.indexOf(n) + (e.key === "j" ? 1 : -1); if (ns[i]) go(ns[i].id); }
+  else if (e.key === "a" && n && n.gate === "approve" && ["passed", "needs_review"].includes((data.state[n.id] || {}).status)) approve(n);
+});
+
+let timer;
+async function refresh() {
+  try {
+    const [st, jb] = await Promise.all([api("/api/state"), api("/api/jobs")]);
+    data = st; jobs = jb.jobs;
+    if (!Object.keys(codes).length) codes = await api("/api/reject-codes");
+    if (!data.nodes.some(n => n.id === selected)) selected = (data.nodes.find(n => n.review === stageKey) || data.nodes[0]).id;
+    notifyChanges(); render();
+    prevJobs = Object.fromEntries(jobs.map(j => [j.id, j.status]));
+    prevStatus = Object.fromEntries(data.nodes.map(n => [n.id, (data.state[n.id] || {}).status]));
+    loaded = true;
+  } catch (e) { toast("Cannot reach the console", e.message, "failed"); }
+  clearTimeout(timer);
+  timer = setTimeout(refresh, jobs.some(j => j.status === "running") ? 1500 : 6000);
+}
+refresh();
+</script>
+</body>
+</html>

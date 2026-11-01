@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OPEN LATE · Fitting room</title>
+<link rel="stylesheet" href="/static/tokens.css">
+<style>
+/* The page answers one question: which size? First screen is the photo, the preference, the sizes, the decision.
+   Everything else sits below it or in a sheet. Grading review and model upkeep live on /fitting/qa. */
+.room{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 380px;grid-template-rows:auto auto auto 1fr;grid-template-areas:"photo picks" "photo decide" "photo act" "photo fit" "more more";
+  column-gap:36px;max-width:1120px;margin:0 auto;padding:20px 24px 48px}
+.stage{grid-area:photo;position:sticky;top:20px;align-self:start;margin:0;height:calc(100vh - var(--shell) - 40px);min-height:420px;border-radius:14px;overflow:hidden;background:var(--studio)}
+.stage .open{display:block;width:100%;height:100%;padding:0;border:0;background:none;cursor:zoom-in}
+.stage img{display:block;width:100%;height:100%;object-fit:contain;object-position:50% 100%}
+.stage img[hidden]{display:none}
+.stage .skel{position:absolute;inset:0;border-radius:0}
+.ai{position:absolute;left:10px;bottom:10px;font-size:12px;font-weight:600;color:#fff;background:rgba(24,24,27,.78);border-radius:6px;padding:3px 8px;pointer-events:none}
+.state{position:absolute;left:10px;right:10px;bottom:42px;display:none;flex-direction:column;gap:8px;color:#fff;background:rgba(24,24,27,.86);border-radius:10px;padding:10px 12px}
+.state.on{display:flex}
+.state .r{display:flex;align-items:center;gap:10px}
+.state .sub{color:#d4d4d8;font-size:13px}
+.state .btn{margin-left:auto;background:#fff;border-color:#fff;color:#18181b}
+
+.decide{grid-area:decide;display:flex;flex-direction:column;gap:14px;padding-top:2px}
+.picks{grid-area:picks;display:flex;flex-direction:column;gap:2px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px}
+.pick{display:flex;align-items:center;gap:8px;min-height:40px;padding:0;background:none;border:0;cursor:pointer;text-align:left}
+.pick .k{flex:0 0 58px;color:var(--t3);font-size:13px}
+.pick .v{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pick .c{color:var(--t3);font-size:13px;text-decoration:underline;text-underline-offset:3px}
+.pick:hover .c{color:var(--t1)}
+.sw{display:inline-flex;margin-right:6px;vertical-align:-1px}.sw i{width:13px;height:13px;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.14)}.sw i+i{margin-left:-4px}
+.q{margin:0 0 6px;color:var(--t2);font-size:14px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button,.sizes button{min-height:44px;background:var(--panel);border:1px solid var(--line2);border-radius:9px;cursor:pointer;padding:4px}
+.seg button:hover,.sizes button:hover{border-color:var(--t3)}
+.seg button[aria-pressed=true],.sizes button[aria-pressed=true]{background:var(--t1);border-color:var(--t1);color:#fff}
+.sizes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.sizes button{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:54px;line-height:1.2}
+.sizes b{font-size:15px;font-weight:650}
+.sizes span{font-size:12px;color:var(--t3)}
+.sizes button[aria-pressed=true] span{color:#d4d4d8}
+.sizes .bad span{color:var(--bad)}
+.sizes button[aria-pressed=true].bad span{color:#fecaca}
+.chartlink{align-self:flex-start;font-size:14px;padding:8px 0;margin:-8px 0}
+
+.act{grid-area:act;display:flex;flex-direction:column;gap:10px;padding:14px 0 18px}
+.reco{margin:0;min-height:45px;font-weight:600;font-size:16px}
+.reco small{display:block;font-weight:400;font-size:14px;color:var(--t2)}
+.act .btn{width:100%;min-height:48px;font-size:16px}
+
+.fit{grid-area:fit;border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:12px}
+.fit h2,.more h2{margin:0;font-size:16px;font-weight:650}
+.row{display:grid;grid-template-columns:62px minmax(0,1fr);gap:0 10px}
+.row .k{color:var(--t3)}
+.row .v{font-weight:600}
+.row .v.bad{color:var(--bad)}.row .v.warn{color:var(--warn)}
+.row .d{grid-column:2;color:var(--t2);font-size:14px}
+.bands{grid-column:2;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin:5px 0 3px}
+.bands i{height:6px;background:var(--line)}.bands i:first-child{border-radius:3px 0 0 3px}.bands i:last-child{border-radius:0 3px 3px 0}
+.bands i.on{background:var(--t1)}
+.note{margin:0;color:var(--t3);font-size:13px}
+
+.more{grid-area:more;display:flex;flex-direction:column;gap:32px;border-top:1px solid var(--line);margin-top:28px;padding-top:24px}
+.more section{display:flex;flex-direction:column;gap:12px}
+.more p{margin:0;color:var(--t2)}
+.angles .fig{position:relative;display:block;margin:0;padding:0;border:0;border-radius:10px;overflow:hidden;background:var(--studio);aspect-ratio:4/5;cursor:zoom-in}
+.fig img{display:block;width:100%;height:100%;object-fit:contain;object-position:50% 100%}
+.fig .ai{left:6px;bottom:6px;font-size:11px;padding:2px 6px}
+.fig .sz{position:absolute;left:6px;top:6px;font-weight:650;background:#fff;border-radius:6px;padding:1px 8px}
+.fig.none{display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:14px;cursor:default}
+.angles{display:grid;grid-template-columns:repeat(2,minmax(0,300px));gap:12px}
+details summary{cursor:pointer;font-weight:650;min-height:32px}
+details[open] summary{margin-bottom:10px}
+
+.sheetlabel{margin:16px 0 8px;color:var(--t3);font-size:13px}.sheetlabel:first-child{margin-top:0}
+.list{display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;align-items:center;gap:12px;min-height:48px;width:100%;padding:6px 12px;background:var(--panel);border:1px solid var(--line2);border-radius:9px;cursor:pointer;text-align:left}
+.opt[aria-pressed=true]{border-color:var(--t1);box-shadow:inset 0 0 0 1px var(--t1)}
+.opt .d{margin-left:auto;color:var(--t3);font-size:13px}
+.opt img{width:44px;height:58px;object-fit:cover;border-radius:6px;background:var(--studio)}
+.faces{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.face{display:flex;flex-direction:column;align-items:center;gap:4px;padding:0;background:none;border:0;cursor:pointer;font-size:13px;color:var(--t2)}
+.face i{display:block;width:64px;height:64px;border-radius:50%;background-color:var(--studio);background-repeat:no-repeat;box-shadow:0 0 0 1px var(--line2)}
+.face[aria-pressed=true]{color:var(--t1);font-weight:600}.face[aria-pressed=true] i{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--t1)}
+
+.toasts{position:fixed;top:58px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:40;width:320px;max-width:calc(100vw - 32px)}
+.toast{display:flex;gap:10px;background:var(--panel);border:1px solid var(--line2);border-left:3px solid var(--c);border-radius:10px;padding:10px 12px;box-shadow:var(--shadow)}
+.toast .tt{font-weight:650}.toast .tm{color:var(--t3);font-size:13px}
+.toast .x{margin-left:auto;align-self:flex-start;background:none;border:0;color:var(--t3);cursor:pointer}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.86);display:none;align-items:center;justify-content:center;z-index:50;padding:24px;cursor:zoom-out}
+.lightbox.on{display:flex}.lightbox img{max-width:100%;max-height:100%;border-radius:8px}
+.lightbox .ai{left:50%;bottom:16px;transform:translateX(-50%);white-space:nowrap}
+
+/* phone: photo, sizes and the decision share the first screen; choices float on the photo */
+@media(max-width:820px){
+  html{scroll-padding-bottom:110px}
+  .room{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"photo" "decide" "fit" "more" "act";padding:0}
+  .stage{position:relative;top:0;height:calc(100svh - var(--shell) - 212px);min-height:300px;border-radius:0}
+  .decide{padding:10px 16px 0;gap:6px}
+  .picks{position:absolute;top:8px;left:8px;right:8px;z-index:3;flex-direction:row;gap:6px;border:0;padding:0;margin:0}
+  .pick{position:relative;flex:0 1 auto;min-width:0;min-height:36px;padding:0 10px;background:rgba(255,255,255,.92);border-radius:99px;font-size:13px}
+  .pick::after{content:"";position:absolute;inset:-4px 0}  /* 44 px touch target around a 36 px chip */
+  .pick .k,.pick .c,.pick .long{display:none}
+  .pick.chart{flex:none;margin-left:auto}
+  .chartlink{display:none}
+  .q{display:none}
+  .fit{padding:18px 16px 0;margin-top:14px}
+  .more{padding:0 16px 24px;margin-top:20px;padding-top:20px}
+  .act{position:sticky;bottom:0;z-index:5;gap:6px;background:var(--panel);border-top:1px solid var(--line);padding:8px 16px calc(8px + env(safe-area-inset-bottom))}
+  .reco{min-height:21px;font-size:14px}.reco small{display:none}
+  .angles{grid-template-columns:minmax(0,1fr)}
+  .act .btn{min-height:46px}
+}
+</style>
+</head>
+<body>
+<header id="ol-shell" data-page="fitting"></header>
+<script src="/static/shell.js"></script>
+
+<main class="room">
+  <h1 class="sr">Fitting room</h1>
+  <figure class="stage" id="stage">
+    <div class="skel" id="skel"></div>
+    <button class="open" id="open" type="button" aria-label="Enlarge image"><img id="shot" alt="" hidden></button>
+    <figcaption class="ai">Virtual model · AI-generated image</figcaption>
+    <div class="state" id="state"></div>
+  </figure>
+
+  <div class="picks">
+    <button class="pick" id="pickBody" type="button"><span class="k">Body</span><span class="v" id="bodyV">&nbsp;</span><span class="c">Change</span></button>
+    <button class="pick" id="pickGarment" type="button"><span class="k">Colour</span><span class="v" id="garmentV">&nbsp;</span><span class="c">Change</span></button>
+  </div>
+
+  <section class="decide" aria-label="Choose a size">
+    <div>
+      <p class="q" id="prefQ">How do you want it to fit?</p>
+      <div class="seg" id="pref" role="group" aria-labelledby="prefQ"><div class="skel" style="height:44px"></div><div class="skel" style="height:44px"></div><div class="skel" style="height:44px"></div></div>
+    </div>
+    <div class="sizes" id="sizes" role="group" aria-label="Size"><div class="skel" style="height:54px"></div><div class="skel" style="height:54px"></div><div class="skel" style="height:54px"></div><div class="skel" style="height:54px"></div><div class="skel" style="height:54px"></div></div>
+    <button class="link chartlink" type="button" id="chartLink">Size chart</button>
+  </section>
+
+  <div class="act">
+    <p class="reco" id="reco"><span class="skel" style="display:block;height:45px"></span></p>
+    <button class="btn primary" id="choose" type="button" disabled aria-label="Loading">&nbsp;</button>
+  </div>
+
+  <section class="fit" aria-labelledby="fitH">
+    <h2 id="fitH">How it fits</h2>
+    <div id="fitRows"><div class="skel" style="height:190px"></div></div>
+    <p class="note">Example image made from the measurements. If the image and the measurements differ, trust the measurements.</p>
+  </section>
+
+  <div class="more">
+    <section id="compare" aria-labelledby="cmpH" hidden>
+      <h2 id="cmpH"></h2>
+      <p id="cmpText"></p>
+      <p class="note">The images do not show this difference accurately yet, so compare the sizes by these numbers.</p>
+      <div><button class="btn" id="see" type="button"></button></div>
+    </section>
+    <section aria-labelledby="angH">
+      <h2 id="angH">Side and back</h2>
+      <div class="angles" id="angles"></div>
+    </section>
+    <details id="chartMore"><summary>All measurements</summary><div id="chartBox"></div></details>
+  </div>
+</main>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="lightbox" id="lightbox" role="dialog" aria-label="Enlarged image"><img alt=""><span class="ai">Virtual model · AI-generated image</span></div>
+<p class="sr" id="live" aria-live="polite"></p>
+
+<script>
+// staging geometry, shared with host/fitting/engine.py: 768x1024 canvas, feet at 980, 200 cm = 956 px
+const CANVAS_W = 768, CANVAS_H = 1024, FLOOR_Y = 980, PX_PER_CM = (980 - 24) / 200;
+
+const $ = id => document.getElementById(id);
+const el = (tag, attrs = {}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") e.className = v; else if (k === "style") e.style.cssText = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids.flat()) if (k !== null && k !== undefined && k !== false) e.append(k instanceof Node ? k : String(k));
+  return e;
+};
+const put = (node, ...kids) => node.replaceChildren(...kids.flat().filter(k => k !== null && k !== undefined && k !== false));
+const api = async (path, opts = {}) => {
+  const r = await fetch(path, {headers: {"content-type": "application/json"}, ...opts});
+  const b = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(b.detail || r.statusText);
+  return b;
+};
+
+const PREFS = [["slim", "Slim"], ["regular", "Regular"], ["relaxed", "Relaxed"]];
+const BANDS = ["tight", "fitted", "regular", "relaxed", "oversized"];
+const FLAG = {tight: "bad", cropped: "bad", short: "bad", long: "warn"};  // colour marks real discomfort, never a chosen look
+const CONFIDENCE = {high: s => `${s} should fit as described.`, medium: () => "Check the chest line below.", low: (s, a) => `Between two sizes. Compare ${s} and ${a}.`};
+
+let cat = null;
+const pending = {}, watching = {}, angleWanted = {};
+const ui = {model: null, garment: null, pref: "regular", size: null, chosen: null};
+try { const s = JSON.parse(localStorage.getItem("ol-room") || "{}"); for (const k in ui) if (k in s) ui[k] = s[k]; } catch (e) {}
+{ const q = new URLSearchParams(location.search);  // deep link: ?model=f-M-east_asian&garment=inknavy-apricot&size=L&pref=relaxed
+  for (const k of ["model", "garment", "size", "pref"]) if (q.get(k)) ui[k] = q.get(k); }
+const save = () => {
+  try { localStorage.setItem("ol-room", JSON.stringify(ui)); } catch (e) {}
+  const q = new URLSearchParams({model: ui.model, garment: ui.garment, pref: ui.pref, size: wear()});
+  history.replaceState(history.state, "", `?${q}`);
+};
+
+const model = () => cat.models.find(m => m.id === ui.model);
+const garment = () => cat.garments.find(g => g.id === ui.garment);
+const reco = () => (model().reco || {})[ui.pref];
+const wear = () => ui.size || (reco() || {}).size || model().size;
+const keyOf = (mid, gid, s) => `${mid}__${gid}__${s}`;
+const curKey = () => keyOf(ui.model, ui.garment, wear());
+const shot = r => r && (r.staged || r.url);
+const secs = () => Math.round((cat.averages.tryon || {}).avg || 30);
+const cm = mm => Math.round(mm / 10);
+const span = mm => { const c = Math.abs(cm(mm)); return `${Math.max(0, c - 1)}–${c + 1} cm`; };
+
+function toast(title, msg, tone = "ok") {
+  const t = el("div", {class: "toast", style: `--c:var(--${tone})`},
+    el("div", {}, el("div", {class: "tt"}, title), msg ? el("div", {class: "tm"}, msg) : null),
+    el("button", {class: "x", type: "button", "aria-label": "Close", onclick: () => t.remove()}, "✕"));
+  $("toasts").prepend(t); setTimeout(() => t.remove(), 6000);
+}
+window.addEventListener("error", e => toast("Page error", `${e.message} (${(e.filename || "").split("/").pop()}:${e.lineno})`, "bad"));
+window.addEventListener("unhandledrejection", e => toast("Page error", String(e.reason && e.reason.message || e.reason), "bad"));
+
+/* ---------- first screen ---------- */
+function renderPicks() {
+  const m = model(), g = garment();
+  put($("bodyV"), `${m.height_cm} cm`, el("span", {class: "long"}, ` · chest ${m.chest_cm} cm`));
+  put($("garmentV"), el("span", {class: "sw"}, el("i", {style: `background:${g.outer_hex}`}), el("i", {style: `background:${g.lining_hex}`})), g.outer);
+  $("pickBody").setAttribute("aria-label", `Body: ${m.height_cm} cm, chest ${m.chest_cm} cm. Change`);
+  $("pickGarment").setAttribute("aria-label", `Colour: ${g.name}. Change`);
+}
+function renderPref() {
+  put($("pref"), PREFS.map(([k, l]) => el("button", {type: "button", "aria-pressed": String(ui.pref === k),
+    onclick: () => { ui.pref = k; ui.size = null; ui.chosen = null; save(); render(); }}, l)));
+}
+function renderSizes() {
+  const m = model(), r = reco();
+  put($("sizes"), cat.sizes.map(s => { const f = m.fits?.[s];
+    return el("button", {type: "button", class: f && FLAG[f.codes.fit] ? "bad" : null, "aria-pressed": String(s === wear()),
+      "aria-label": `${s}${f ? `, ${f.fit}` : ""}${r && r.size === s ? ", recommended" : ""}`,
+      onclick: () => { ui.size = s; ui.chosen = null; save(); render(); }},
+      el("b", {}, s), f ? el("span", {}, f.fit) : null); }));
+}
+function renderAct() {
+  const r = reco(), size = wear(), f = model().fits?.[size], chosen = ui.chosen === chosenKey();
+  put($("reco"), r ? `Usually ${r.size}. ${r.alt} if you want it ${r.alt_dir}.` : "Run the pattern to get a size recommendation.",
+    r ? el("small", {}, CONFIDENCE[r.confidence](r.size, r.alt)) : null);
+  const b = $("choose");
+  b.disabled = false; b.removeAttribute("aria-label"); b.setAttribute("aria-pressed", String(chosen));
+  b.textContent = chosen ? `Chosen: ${size}${f ? ` · ${f.fit}` : ""}` : `Choose ${size}${f ? ` · ${f.fit}` : ""}`;
+}
+const chosenKey = () => curKey();
+
+/* the stage: what is on screen stays until something newer replaces it */
+function nearestShot() {
+  const i = cat.sizes.indexOf(wear());
+  const near = [...cat.sizes].sort((a, b) => Math.abs(cat.sizes.indexOf(a) - i) - Math.abs(cat.sizes.indexOf(b) - i));
+  for (const s of near) { const r = cat.renders[keyOf(ui.model, ui.garment, s)]; if (r) return [shot(r), s]; }
+  return [null, null];
+}
+function renderStage() {
+  const m = model(), size = wear(), key = curKey(), r = cat.renders[key], p = pending[key];
+  const [src, shown] = r ? [shot(r), size] : nearestShot();
+  const img = $("shot"), url = src || m.staged || m.portrait;
+  if (img.getAttribute("src") !== url) img.src = url;
+  img.hidden = false; $("skel").style.display = "none";
+  img.alt = `Virtual model, ${m.height_cm} cm, wearing ${shown || "no garment"}${shown ? ` in ${garment().outer}` : ""}`;
+  const box = $("state");
+  box.classList.toggle("on", !r);
+  if (r) { put(box); return; }
+  if (p) {
+    const running = p.status === "running", elapsed = Math.round(p.elapsed || 0);
+    put(box, el("div", {class: "r"},
+      el("div", {}, el("div", {}, running ? `Making ${size}` : `${size} is in the queue${p.position > 1 ? `, position ${p.position}` : ""}`),
+        el("div", {class: "sub num"}, running ? `${elapsed} s · about ${Math.max(1, secs() - elapsed)} s left` : `About ${secs()} s once it starts`)),
+      el("button", {type: "button", class: "btn", onclick: () => cancel(key)}, "Cancel")),
+      el("div", {class: "progress"}, el("i", {style: `width:${running ? Math.min(95, 100 * elapsed / secs()) : 3}%`})));
+    return;
+  }
+  const note = shown ? `Showing ${shown}. ${size} has no image yet.` : `${size} has no image yet.`;
+  put(box, cat.engine.online
+    ? el("div", {class: "r"}, el("div", {class: "sub"}, note), el("button", {type: "button", class: "btn", onclick: () => tryOn(ui.model, ui.garment, size)}, `Make it · about ${secs()} s`))
+    : el("div", {class: "sub"}, `${note} The render engine is off, so new images are paused. The measurements below still apply.`));
+}
+
+/* ---------- below the first screen ---------- */
+function renderFit() {
+  const m = model(), size = wear(), f = m.fits?.[size];
+  if (!f) { put($("fitRows"), el("p", {class: "note"}, "Run the pattern to see how each size fits.")); return; }
+  const ease = f.ease_mm >= 0 ? `About ${span(f.ease_mm)} of room around the chest (${span(f.ease_mm / 2)} across the front)`
+    : `About ${span(f.ease_mm)} smaller than this body around the chest`;
+  put($("fitRows"),
+    el("div", {class: "row"}, el("span", {class: "k"}, "Chest"), el("span", {class: `v ${FLAG[f.codes.fit] || ""}`}, f.fit),
+      el("div", {class: "bands", "aria-hidden": "true"}, BANDS.map(b => el("i", {class: b === f.codes.fit ? "on" : null}))),
+      el("span", {class: "d"}, ease)),
+    el("div", {class: "row", style: "margin-top:10px"}, el("span", {class: "k"}, "Length"), el("span", {class: `v ${FLAG[f.codes.length] || ""}`}, f.length)),
+    el("div", {class: "row", style: "margin-top:10px"}, el("span", {class: "k"}, "Sleeve"), el("span", {class: `v ${FLAG[f.codes.sleeve] || ""}`}, f.sleeve)),
+    el("p", {class: "note", style: "margin-top:10px"}, `Estimated for a ${m.height_cm} cm body with a ${m.chest_cm} cm chest.`));
+}
+const figure = (src, label) => src
+  ? el("button", {type: "button", class: "fig", "aria-label": `Enlarge ${label}`, onclick: () => zoom(src)}, el("img", {src, alt: `Virtual model wearing ${label}`, loading: "lazy"}),
+      el("span", {class: "sz"}, label), el("span", {class: "ai"}, "Virtual model · AI-generated image"))
+  : el("div", {class: "fig none"}, `${label}: no image yet`);
+function renderCompare() {
+  const m = model(), r = reco(), a = r && (wear() === r.size ? r.alt : r.size), now = wear();
+  $("compare").hidden = !a;
+  if (!a) return;
+  const big = cat.sizes.indexOf(a) > cat.sizes.indexOf(now) ? a : now, small = big === a ? now : a;
+  const fb = m.fits[big], fs = m.fits[small];
+  $("cmpH").textContent = `${now} and ${a} on this body`;
+  $("cmpText").textContent = `${big} is about ${cm(fb.ease_mm - fs.ease_mm)} cm wider around the chest, ${cm(fb.length_mm - fs.length_mm)} cm longer, and ${cm(fb.sleeve_mm - fs.sleeve_mm)} cm longer in the sleeve.`;
+  $("see").textContent = `See ${a}`; $("see").onclick = () => { ui.size = a; ui.chosen = null; save(); render(); scrollTo({top: 0}); };
+}
+function renderAngles() {
+  const key = curKey(), r = cat.renders[key], v = (cat.views || {})[key] || {};
+  if (v["090"] && v["180"]) { delete angleWanted[key]; put($("angles"), figure(v["090"], "Side"), figure(v["180"], "Back")); return; }
+  put($("angles"), !r ? el("p", {}, "Available once this size has an image.")
+    : angleWanted[key] ? el("p", {}, "Making side and back views, about 2 minutes.")
+    : cat.engine.online ? el("button", {type: "button", class: "btn", onclick: makeAngles}, "Make side and back · about 2 min")
+    : el("p", {}, "The render engine is off."));
+}
+
+function render() {
+  if (!cat) return;
+  if (!cat.models.some(m => m.id === ui.model && m.portrait)) {
+    const seen = {}; for (const k of Object.keys(cat.renders)) { const id = k.split("__")[0]; seen[id] = (seen[id] || 0) + 1; }
+    const best = Object.keys(seen).sort((a, b) => seen[b] - seen[a])[0];
+    ui.model = best || (cat.models.find(m => m.portrait) || {}).id; ui.size = null;
+  }
+  if (!cat.garments.some(g => g.id === ui.garment)) {
+    const with_ = Object.keys(cat.renders).find(k => k.startsWith(`${ui.model}__`));
+    ui.garment = with_ ? with_.split("__")[1] : cat.garments[0].id;
+  }
+  renderPicks(); renderPref(); renderSizes(); renderAct(); renderStage(); renderFit(); renderCompare(); renderAngles();
+  if (window.OL) OL.setSize(wear());
+}
+
+/* ---------- sheets: body by the numbers, then which model shows it ---------- */
+let sheetGender = null;
+function faceStyle(m, d = 64) {  // the head sits right under height_cm, ~13% of the body tall
+  if (!m.staged) return "";
+  const hPx = m.height_cm * PX_PER_CM, cy = FLOOR_Y - hPx + 0.075 * hPx, s = d / (0.21 * hPx);
+  return `background-image:url("${m.staged}");background-size:${CANVAS_W * s}px ${CANVAS_H * s}px;background-position:${d / 2 - (CANVAS_W / 2) * s}px ${d / 2 - cy * s}px`;
+}
+function bodySheet() {
+  const m = model(); sheetGender ??= m.gender;
+  const same = g => cat.models.filter(x => x.gender === g && x.ethnicity === m.ethnicity);
+  const pick = id => { ui.model = id; ui.size = null; ui.chosen = null; save(); render(); bodySheet(); };
+  const swap = g => { sheetGender = g; bodySheet(); };
+  const rows = same(sheetGender).map(x => el("button", {type: "button", class: "opt", "aria-pressed": String(x.gender === m.gender && x.size === m.size), onclick: () => pick(x.id)},
+    el("span", {class: "num"}, `${x.height_cm} cm · chest ${x.chest_cm} cm`)));
+  const line = cat.models.filter(x => x.gender === m.gender && x.size === m.size);
+  OL.sheet("Choose a body",
+    el("div", {class: "seg", style: "grid-template-columns:1fr 1fr", role: "group", "aria-label": "Body type"},
+      [["female", "Women's bodies"], ["male", "Men's bodies"]].map(([g, l]) => el("button", {type: "button", "aria-pressed": String(sheetGender === g), onclick: () => swap(g)}, l))),
+    el("p", {class: "sheetlabel"}, "Pick the numbers closest to yours"),
+    el("div", {class: "list"}, rows),
+    el("p", {class: "sheetlabel"}, "Model shown"),
+    el("div", {class: "faces"}, line.map(x => el("button", {type: "button", class: "face", "aria-pressed": String(x.id === m.id), onclick: () => pick(x.id)},
+      el("i", {style: faceStyle(x)}), x.ethnicity_label))),
+    el("p", {class: "note", style: "margin-top:14px"}, "Every model is an AI-generated virtual person, used to show fit."));
+}
+function garmentSheet() {
+  OL.sheet("Choose a colour", el("div", {class: "list"}, cat.garments.map(g => el("button", {type: "button", class: "opt", "aria-pressed": String(g.id === ui.garment),
+    onclick: () => { ui.garment = g.id; ui.chosen = null; save(); render(); OL.closeSheet(); }},
+    el("img", {src: g.image || "", alt: ""}), el("span", {}, g.name)))));
+}
+
+/* ---------- actions ---------- */
+async function tryOn(mid, gid, size) {
+  const key = keyOf(mid, gid, size);
+  if (cat.renders[key] || pending[key]) return;
+  try { track(await OL.wait(api("/api/fitting/tryon", {method: "POST", body: JSON.stringify({model: mid, garment: gid, size})}))); render(); }
+  catch (e) { toast("Could not start the image", e.message, "bad"); }
+}
+function track(r) {
+  if (r.status === "ready") { refresh(); return; }
+  pending[r.key] = {status: r.status, position: r.position};
+  poll(r.key); $("live").textContent = "Making the image.";
+}
+async function cancel(key) {
+  delete pending[key]; render();
+  try { await OL.wait(api(`/api/fitting/tryon/${key}`, {method: "DELETE"})); $("live").textContent = "Cancelled."; }
+  catch (e) { toast("Could not cancel", e.message, "bad"); }
+}
+async function makeAngles() {
+  const key = curKey();
+  try {
+    const r = await OL.wait(api("/api/fitting/views", {method: "POST", body: JSON.stringify({model: ui.model, garment: ui.garment, size: wear()})}));
+    if (r.queued) angleWanted[key] = true;
+    refresh();
+  } catch (e) { toast("Could not make the views", e.message, "bad"); }
+}
+async function poll(key) {
+  if (watching[key]) return; watching[key] = true;
+  while (pending[key]) {
+    await new Promise(r => setTimeout(r, 1200));
+    let st; try { st = await api(`/api/fitting/tryon/${key}`); } catch (e) { continue; }
+    const p = pending[key]; if (!p) break;
+    if (st.status === "ready") {
+      delete pending[key]; $("live").textContent = "The image is ready.";
+      if (key !== curKey()) toast("Image ready", key.split("__")[2]);
+      await refresh(); break;
+    }
+    if (["failed", "missing", "cancelled"].includes(st.status)) {
+      delete pending[key]; if (st.status === "failed") toast("The image failed", st.error || "Try again.", "bad"); render(); break;
+    }
+    Object.assign(p, {status: st.status, position: st.position, elapsed: st.elapsed});
+    if (key === curKey()) renderStage();
+  }
+  delete watching[key];
+}
+
+/* ---------- page wiring ---------- */
+function zoom(src) { $("lightbox").querySelector("img").src = src.replace(".scaled.png", ".png"); $("lightbox").classList.add("on"); }
+$("open").addEventListener("click", () => { const s = $("shot").getAttribute("src"); if (s) zoom(s); });
+$("lightbox").addEventListener("click", () => $("lightbox").classList.remove("on"));
+$("pickBody").addEventListener("click", () => { sheetGender = null; bodySheet(); });
+$("pickGarment").addEventListener("click", garmentSheet);
+$("chartLink").addEventListener("click", () => OL.openChart());
+$("choose").addEventListener("click", () => { ui.chosen = ui.chosen === chosenKey() ? null : chosenKey(); save(); renderAct(); });
+$("chartMore").addEventListener("toggle", e => { if (e.target.open) OL.sizeChart($("chartBox")); }, {once: true});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { $("lightbox").classList.remove("on"); return; }
+  if (!cat || e.metaKey || e.ctrlKey || e.altKey || !["ArrowLeft", "ArrowRight"].includes(e.key)) return;
+  e.preventDefault();
+  const i = cat.sizes.indexOf(wear()) + (e.key === "ArrowRight" ? 1 : -1);
+  if (cat.sizes[i]) { ui.size = cat.sizes[i]; ui.chosen = null; save(); render(); }
+});
+
+let timer;
+async function refresh() {
+  try {
+    cat = await OL.wait(api("/api/fitting/catalog"));
+    for (const k of cat.pending || []) if (!pending[k] && !cat.renders[k]) { pending[k] = {status: "queued"}; poll(k); }
+    render(); save();
+  } catch (e) { toast("The catalog could not be loaded", e.message, "bad"); }
+  clearTimeout(timer);
+  timer = setTimeout(refresh, (cat && cat.engine && cat.engine.queue) || Object.keys(angleWanted).length ? 4000 : 15000);
+}
+refresh();
+</script>
+</body>
+</html>

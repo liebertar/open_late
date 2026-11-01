@@ -1,0 +1,19 @@
+services:
+  console:
+    build: .
+    ports: ["127.0.0.1:7100:7100"]
+    environment:
+      DATA_DIR: /data
+      TZ: Asia/Seoul
+      NODES_FILE: /pipeline/nodes.yaml
+      PATTERN_URL: http://pattern:7110
+      WORKER_URL: http://worker:7120
+      ENGINE_URL: http://host.docker.internal:8091
+    volumes:
+      - ../../data:/data
+      - ../../pipeline:/pipeline:ro
+      - ../../docs:/docs:ro
+    depends_on:
+      pattern: {condition: service_healthy}
+      worker: {condition: service_healthy}
+    restart: unless-stopped
