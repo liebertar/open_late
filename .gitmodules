@@ -1,0 +1,3 @@
+[submodule "research/sml-lab"]
+	path = research/sml-lab
+	url = https://github.com/liebertar/sml-lab.git

@@ -1,0 +1,13 @@
+# OPEN LATE stack. `docker compose up -d` brings up every stack below.
+# Each stack is self-contained under stacks/<name>/ and can be split into its own repo later.
+#
+# NOT in here: model inference (Qwen, FLUX.2 klein, SAM 3). Docker on macOS cannot reach the
+# Metal GPU, so models run natively via host/model-gateway (`make gateway`). Containers reach
+# it at http://host.docker.internal:8090.
+name: open_late
+
+include:
+  - stacks/console/compose.yaml        # :7100  node board · approval gates · history
+  - stacks/pattern/compose.yaml        # :7110  FreeSewing → SVG (mm, seam allowance, notches)
+  - stacks/worker/compose.yaml         # :7120  SVG → DXF (AAMA layers) + automatic checks
+  - stacks/observability/compose.yaml  # :5060  MLflow  (profile full: MinIO :9100/9101)
