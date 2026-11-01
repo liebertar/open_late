@@ -1,0 +1,18 @@
+{
+  "note": "PLACEHOLDER until the Korean size chart (Size Korea data) is set. Unisex garments are drafted on FreeSewing's cisMaleAdult body sets; the number is roughly chest circumference in inches. people.female lists the cisFemaleAdult set a woman wearing that size would have (used by the fitting room).",
+  "sizes": {
+    "XS": { "base": "cisMaleAdult", "model": "34" },
+    "S":  { "base": "cisMaleAdult", "model": "38" },
+    "M":  { "base": "cisMaleAdult", "model": "42" },
+    "L":  { "base": "cisMaleAdult", "model": "46" },
+    "XL": { "base": "cisMaleAdult", "model": "50" }
+  },
+  "people": {
+    "male":   { "XS": "34", "S": "38", "M": "42", "L": "46", "XL": "50" },
+    "female": { "XS": "30", "S": "34", "M": "38", "L": "42", "XL": "46" },
+    "height_mm": {
+      "male":   { "XS": 1660, "S": 1710, "M": 1750, "L": 1790, "XL": 1820 },
+      "female": { "XS": 1550, "S": 1600, "M": 1640, "L": 1680, "XL": 1710 }
+    }
+  }
+}

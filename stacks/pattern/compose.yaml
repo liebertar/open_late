@@ -1,0 +1,5 @@
+services:
+  pattern:
+    build: .
+    ports: ["127.0.0.1:7110:7110"]
+    restart: unless-stopped

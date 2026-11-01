@@ -1,0 +1,14 @@
+{
+  "name": "open-late-pattern",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node src/server.mjs" },
+  "dependencies": {
+    "@freesewing/core": "4.10.2",
+    "@freesewing/config": "4.10.2",
+    "@freesewing/plugin-transform": "4.10.2",
+    "@freesewing/hugo": "4.10.2",
+    "@freesewing/sven": "4.10.2",
+    "@freesewing/models": "4.10.2"
+  }
+}
